@@ -8,6 +8,7 @@ PyYAML>=6.0
 # Audio Processing
 pyaudio>=0.2.11
 wave
+soundfile
 
 # Optional Dependencies
 pygame>=2.1.0  # For audio playback
