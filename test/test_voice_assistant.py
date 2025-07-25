@@ -69,7 +69,7 @@ def test_plugin_whisper_info():
     """Test Whisper STT plugin info."""
     from plugins.stt_whisper_cpp import get_info
     info = get_info()
-    assert info['name'] == 'Whisper.cpp STT'
+    assert info['name'] == 'OpenAI Whisper STT'
     assert 'id' in info['languages']
 
 def test_soundfx_plugin():

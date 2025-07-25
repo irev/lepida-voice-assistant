@@ -1,6 +1,6 @@
 """
 OpenAI Whisper STT Plugin
-Offline speech-to-text using OpenAI Whisper Python package
+Offline speech-to-text using OpenAI Whisper STT Python package
 """
 
 import logging
@@ -155,11 +155,12 @@ def _record_temp_audio(duration=5):
 
 def get_languages():
     """Get supported languages."""
-    return [
-        "id", "en", "zh", "de", "es", "ru", "ko", "fr", "ja", "pt", "tr", "pl",
-        "ca", "nl", "ar", "sv", "it", "hi", "cs", "he", "fi", "vi", "uk", "el"
-    ]
-
+    return {
+        "name": "OpenAI Whisper STT",
+        "id": "Indonesian",
+        "description": "Offline speech-to-text using OpenAI Whisper",
+        "author": "Lepida Voice Assistant Team"
+    }
 def check_availability():
     """Check if OpenAI Whisper is available."""
     return WHISPER_AVAILABLE

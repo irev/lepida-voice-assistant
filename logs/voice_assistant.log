@@ -1,0 +1,21 @@
+2025-07-25 15:54:28,121 - __main__ - INFO - Voice Assistant initialized
+2025-07-25 15:54:28,137 - utils.audio_effects - INFO - Loaded beep sound effects engine
+2025-07-25 15:54:28,138 - __main__ - INFO - Audio effects initialized successfully
+2025-07-25 15:54:31,471 - utils.text_to_speech - INFO - Loaded TTS engine: mms_tts
+2025-07-25 15:54:31,471 - __main__ - INFO - TTS initialized successfully
+2025-07-25 15:54:31,678 - utils.audio_transcription - INFO - Loaded STT engine: whisper_cpp
+2025-07-25 15:54:31,678 - __main__ - INFO - STT initialized successfully
+2025-07-25 15:54:31,780 - helper.audio_processing - INFO - Audio processor initialized - Input: 1, Output: 4
+2025-07-25 15:54:31,780 - __main__ - INFO - Audio processor initialized successfully
+2025-07-25 15:54:31,781 - __main__ - INFO - Command processor initialized successfully
+2025-07-25 15:54:31,783 - utils.wake_word_detection - INFO - Loaded Porcupine wake word engine
+2025-07-25 15:54:31,783 - __main__ - INFO - Wake word detector initialized successfully
+2025-07-25 15:54:31,784 - utils.performance_monitor - INFO - Performance monitoring started
+2025-07-25 15:54:31,793 - __main__ - INFO - Performance monitor initialized successfully
+2025-07-25 15:54:31,793 - __main__ - INFO - Starting interactive mode
+2025-07-25 15:54:32,212 - plugins.tts_mms_tts - INFO - Loading MMS TTS model: facebook/mms-tts-ind
+2025-07-25 15:54:33,903 - plugins.tts_mms_tts - INFO - MMS TTS model loaded successfully
+2025-07-25 15:54:33,904 - plugins.tts_mms_tts - INFO - Converting text to speech: 'Halo! Asisten suara siap membantu Anda....'
+2025-07-25 15:54:34,988 - plugins.tts_mms_tts - INFO - Audio saved to outputs/sound/output.wav
+2025-07-25 15:54:51,071 - plugins.tts_mms_tts - INFO - Converting text to speech: 'Sampai jumpa!...'
+2025-07-25 15:54:51,535 - plugins.tts_mms_tts - INFO - Audio saved to outputs/sound/output.wav
