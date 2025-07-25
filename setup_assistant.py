@@ -11,12 +11,123 @@ import shutil
 import platform
 import importlib
 from pathlib import Path
+import traceback
+import time
+
+class SetupError(Exception):
+    """Custom exception for setup-related errors."""
+    def __init__(self, message, solution=None, error_code=None):
+        self.message = message
+        self.solution = solution
+        self.error_code = error_code
+        super().__init__(self.message)
+
+def print_error_with_solution(error_msg, solution=None, error_code=None):
+    """Print error message with solution suggestions."""
+    print(f"❌ ERROR: {error_msg}")
+    if error_code:
+        print(f"   Error Code: {error_code}")
+    if solution:
+        print(f"💡 SOLUTION: {solution}")
+    print()
+
+def handle_subprocess_error(e, operation="Operation"):
+    """Handle subprocess errors with detailed information."""
+    error_msg = f"{operation} failed with exit code {e.returncode}"
+    
+    if hasattr(e, 'stderr') and e.stderr:
+        stderr_output = e.stderr.strip()
+        print(f"❌ {error_msg}")
+        print(f"   Error output: {stderr_output}")
+        
+        # Provide specific solutions based on error patterns
+        if "permission denied" in stderr_output.lower():
+            solution = "Try running as administrator/sudo, or check file permissions"
+        elif "no module named" in stderr_output.lower():
+            solution = "Install missing dependencies: pip install -r requirements.txt"
+        elif "externally-managed-environment" in stderr_output.lower():
+            solution = "Use virtual environment: python -m venv .venv && activate it"
+        elif "network" in stderr_output.lower() or "connection" in stderr_output.lower():
+            solution = "Check internet connection and try again"
+        elif "disk" in stderr_output.lower() or "space" in stderr_output.lower():
+            solution = "Free up disk space and try again"
+        else:
+            solution = "Check the error details above and ensure all prerequisites are met"
+        
+        print_error_with_solution("", solution, f"SUBPROCESS_{e.returncode}")
+    else:
+        print_error_with_solution(error_msg, "Check system requirements and try again", f"SUBPROCESS_{e.returncode}")
+
+def check_prerequisites():
+    """Check system prerequisites before starting setup."""
+    print("🔍 Checking system prerequisites...")
+    
+    issues = []
+    
+    # Check Python version
+    if sys.version_info < (3, 8):
+        issues.append("Python 3.8+ is required")
+    
+    # Check if running as admin on Windows (for some operations)
+    if platform.system() == "Windows":
+        try:
+            import ctypes
+            is_admin = ctypes.windll.shell32.IsUserAnAdmin()
+        except:
+            is_admin = False
+        
+        if not is_admin:
+            print("   ⚠️  Not running as administrator - some operations may fail")
+    
+    # Check available disk space
+    try:
+        import shutil
+        free_space = shutil.disk_usage('.').free / (1024**3)  # GB
+        if free_space < 1:
+            issues.append(f"Low disk space: {free_space:.1f}GB available (minimum 1GB required)")
+    except:
+        pass
+    
+    # Check internet connectivity
+    try:
+        import urllib.request
+        urllib.request.urlopen('https://pypi.org', timeout=5)
+        print("   ✅ Internet connection available")
+    except:
+        print("   ⚠️  No internet connection - offline installation only")
+    
+    if issues:
+        print("   ❌ Prerequisites check failed:")
+        for issue in issues:
+            print(f"     - {issue}")
+        return False
+    else:
+        print("   ✅ Prerequisites check passed")
+        return True
 
 def print_banner():
     """Print setup banner."""
-    print("=" * 60)
-    print("🤖 LEPIDA VOICE ASSISTANT SETUP")
-    print("=" * 60)
+    print("=" * 80)
+    print("""
+    ██╗     ███████╗██████╗ ██╗██████╗  █████╗     ██╗   ██╗ ██████╗ ██╗ ██████╗███████╗
+    ██║     ██╔════╝██╔══██╗██║██╔══██╗██╔══██╗    ██║   ██║██╔═══██╗██║██╔════╝██╔════╝
+    ██║     █████╗  ██████╔╝██║██║  ██║███████║    ██║   ██║██║   ██║██║██║     █████╗  
+    ██║     ██╔══╝  ██╔═══╝ ██║██║  ██║██╔══██║    ╚██╗ ██╔╝██║   ██║██║██║     ██╔══╝  
+    ███████╗███████╗██║     ██║██████╔╝██║  ██║     ╚████╔╝ ╚██████╔╝██║╚██████╗███████╗
+    ╚══════╝╚══════╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝      ╚═══╝   ╚═════╝ ╚═╝ ╚═════╝╚══════╝
+                                                                                        
+                         █████╗ ███████╗███████╗██╗███████╗████████╗ █████╗ ███╗   ██╗████████╗
+                        ██╔══██╗██╔════╝██╔════╝██║██╔════╝╚══██╔══╝██╔══██╗████╗  ██║╚══██╔══╝
+                        ███████║███████╗███████╗██║███████╗   ██║   ███████║██╔██╗ ██║   ██║   
+                        ██╔══██║╚════██║╚════██║██║╚════██║   ██║   ██╔══██║██║╚██╗██║   ██║   
+                        ██║  ██║███████║███████║██║███████║   ██║   ██║  ██║██║ ╚████║   ██║   
+                        ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   
+    """)
+    print("🤖 INTELLIGENT VOICE ASSISTANT SETUP & INSTALLATION")
+    print("=" * 80)
+    print("🎯 Offline/Online Voice Assistant powered by advanced AI technologies")
+    print("🚀 Setting up your personal AI assistant...")
+    print("=" * 80)
     print()
 
 def check_python_version():
@@ -33,6 +144,99 @@ def check_python_version():
     print(f"   Platform: {platform.system()} {platform.release()}")
     print(f"   Architecture: {platform.machine()}")
     return True
+
+def setup_virtual_environment():
+    """Create and setup virtual environment."""
+    print("🐍 Setting up virtual environment...")
+    
+    venv_path = Path(".venv")
+    
+    # Check if virtual environment already exists
+    if venv_path.exists():
+        print("   ✅ Virtual environment already exists")
+        
+        # Check if we're currently in the virtual environment
+        if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
+            print("   ✅ Currently running in virtual environment")
+            return True
+        else:
+            print("   ⚠️  Virtual environment exists but not activated")
+            print("   To activate: .venv\\Scripts\\activate (Windows) or source .venv/bin/activate (Linux/Mac)")
+            return True
+    
+    try:
+        # Create virtual environment
+        print("   Creating virtual environment...")
+        
+        # Determine the correct Python executable
+        python_cmd = "python3" if platform.system() != "Windows" else "python"
+        
+        # Try python3 first, fallback to python
+        try:
+            result = subprocess.run([python_cmd, "-m", "venv", ".venv"], 
+                                  check=True, capture_output=True, text=True, timeout=300)
+            print("   ✅ Virtual environment created successfully")
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            if python_cmd == "python3":
+                python_cmd = "python"
+                try:
+                    result = subprocess.run([python_cmd, "-m", "venv", ".venv"], 
+                                          check=True, capture_output=True, text=True, timeout=300)
+                    print("   ✅ Virtual environment created successfully")
+                except subprocess.CalledProcessError as e2:
+                    handle_subprocess_error(e2, "Virtual environment creation")
+                    return False
+            else:
+                handle_subprocess_error(e, "Virtual environment creation")
+                return False
+        except subprocess.TimeoutExpired:
+            print_error_with_solution(
+                "Virtual environment creation timed out",
+                "Try again with a faster internet connection or manually create: python -m venv .venv",
+                "VENV_TIMEOUT"
+            )
+            return False
+        
+        # Provide activation instructions
+        if platform.system() == "Windows":
+            activation_cmd = ".venv\\Scripts\\activate"
+        else:
+            activation_cmd = "source .venv/bin/activate"
+        
+        print(f"   To activate: {activation_cmd}")
+        print("   ⚠️  Please activate the virtual environment and run setup again")
+        print(f"   Command: {activation_cmd} && python setup_assistant.py")
+        
+        return True
+        
+    except PermissionError:
+        print_error_with_solution(
+            "Permission denied while creating virtual environment",
+            "Run as administrator (Windows) or with sudo (Linux/Mac), or choose a different directory",
+            "VENV_PERMISSION"
+        )
+        return False
+    except OSError as e:
+        if "No space left on device" in str(e):
+            print_error_with_solution(
+                "Insufficient disk space for virtual environment",
+                "Free up at least 500MB of disk space and try again",
+                "VENV_DISK_SPACE"
+            )
+        else:
+            print_error_with_solution(
+                f"OS error during virtual environment creation: {e}",
+                "Check system requirements and available resources",
+                "VENV_OS_ERROR"
+            )
+        return False
+    except Exception as e:
+        print_error_with_solution(
+            f"Unexpected error during virtual environment setup: {e}",
+            "Try manually creating virtual environment: python -m venv .venv",
+            "VENV_UNKNOWN"
+        )
+        return False
 
 def check_system_requirements():
     """Check system requirements and available resources."""
@@ -235,18 +439,84 @@ def install_dependencies():
     
     requirements_file = Path("requirements.txt")
     if not requirements_file.exists():
-        print("❌ requirements.txt not found")
+        print_error_with_solution(
+            "requirements.txt not found",
+            "Ensure you're in the correct project directory or create requirements.txt",
+            "REQ_FILE_MISSING"
+        )
         return False
     
     try:
-        subprocess.run([
-            sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
-        ], check=True, capture_output=True, text=True)
-        print("✅ Dependencies installed successfully")
+        # Check if we're in a virtual environment
+        in_venv = hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix)
+        if not in_venv and Path(".venv").exists():
+            print("   ⚠️  Virtual environment exists but not activated")
+            print("   Consider activating it before installing dependencies")
+        
+        print("   Installing Python packages...")
+        result = subprocess.run([
+            sys.executable, "-m", "pip", "install", "-r", "requirements.txt", "--upgrade"
+        ], check=True, capture_output=True, text=True, timeout=1800)  # 30 minute timeout
+        
+        print("   ✅ Dependencies installed successfully")
+        
+        # Check for potential issues in pip output
+        if result.stderr and "WARNING" in result.stderr:
+            print("   ⚠️  Some warnings occurred during installation:")
+            warnings = [line for line in result.stderr.split('\n') if 'WARNING' in line]
+            for warning in warnings[:3]:  # Show first 3 warnings
+                print(f"     {warning.strip()}")
+        
         return True
+        
     except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to install dependencies: {e}")
-        print(f"   Error output: {e.stderr}")
+        handle_subprocess_error(e, "Dependencies installation")
+        
+        # Additional specific error handling
+        if hasattr(e, 'stderr') and e.stderr:
+            stderr_lower = e.stderr.lower()
+            if "externally-managed-environment" in stderr_lower:
+                print_error_with_solution(
+                    "Python environment is externally managed",
+                    "Use virtual environment: python -m venv .venv && activate it, then run setup again",
+                    "PIP_EXTERNALLY_MANAGED"
+                )
+            elif "could not find a version" in stderr_lower:
+                print_error_with_solution(
+                    "Some packages are not available for your Python version",
+                    "Update Python to 3.8+ or check requirements.txt for compatibility",
+                    "PIP_VERSION_CONFLICT"
+                )
+            elif "no space left" in stderr_lower:
+                print_error_with_solution(
+                    "Insufficient disk space",
+                    "Free up disk space and try again",
+                    "PIP_DISK_SPACE"
+                )
+        return False
+        
+    except subprocess.TimeoutExpired:
+        print_error_with_solution(
+            "Package installation timed out",
+            "Check internet connection and try again, or install packages manually",
+            "PIP_TIMEOUT"
+        )
+        return False
+        
+    except FileNotFoundError:
+        print_error_with_solution(
+            "pip command not found",
+            "Ensure Python is properly installed and added to PATH",
+            "PIP_NOT_FOUND"
+        )
+        return False
+        
+    except Exception as e:
+        print_error_with_solution(
+            f"Unexpected error during dependency installation: {e}",
+            "Try installing dependencies manually: pip install -r requirements.txt",
+            "PIP_UNKNOWN"
+        )
         return False
 
 def setup_frontend():
@@ -255,48 +525,103 @@ def setup_frontend():
     
     frontend_dir = Path("frontend")
     if not frontend_dir.exists():
-        print("❌ Frontend directory not found")
+        print_error_with_solution(
+            "Frontend directory not found",
+            "Ensure you're in the correct project directory with frontend/ folder",
+            "FRONTEND_DIR_MISSING"
+        )
         return False
     
     # Check if frontend requirements.txt exists
     frontend_requirements = frontend_dir / "requirements.txt"
     if not frontend_requirements.exists():
-        print("❌ Frontend requirements.txt not found")
+        print_error_with_solution(
+            "Frontend requirements.txt not found",
+            "Create frontend/requirements.txt or check project structure",
+            "FRONTEND_REQ_MISSING"
+        )
         return False
     
     try:
         # Install frontend dependencies
         print("   Installing frontend dependencies...")
-        subprocess.run([
+        result = subprocess.run([
             sys.executable, "-m", "pip", "install", "-r", str(frontend_requirements)
-        ], check=True, capture_output=True, text=True)
+        ], check=True, capture_output=True, text=True, timeout=1800)
         print("   ✅ Frontend dependencies installed")
         
         # Create frontend templates directory if not exists
-        templates_dir = frontend_dir / "templates"
-        templates_dir.mkdir(exist_ok=True)
-        
-        # Copy index.html to templates if needed
-        main_index = frontend_dir / "index.html"
-        template_index = templates_dir / "index.html"
-        
-        if main_index.exists() and not template_index.exists():
-            shutil.copy2(main_index, template_index)
-            print("   ✅ HTML template copied to templates directory")
-        
-        # Create static directories
-        static_dirs = ["static", "static/css", "static/js", "temp"]
-        for static_dir in static_dirs:
-            (frontend_dir / static_dir).mkdir(parents=True, exist_ok=True)
-        
-        print("   ✅ Frontend directories created")
+        try:
+            templates_dir = frontend_dir / "templates"
+            templates_dir.mkdir(exist_ok=True)
+            
+            # Copy index.html to templates if needed
+            main_index = frontend_dir / "index.html"
+            template_index = templates_dir / "index.html"
+            
+            if main_index.exists() and not template_index.exists():
+                shutil.copy2(main_index, template_index)
+                print("   ✅ HTML template copied to templates directory")
+            
+            # Create static directories
+            static_dirs = ["static", "static/css", "static/js", "temp"]
+            for static_dir in static_dirs:
+                (frontend_dir / static_dir).mkdir(parents=True, exist_ok=True)
+            
+            print("   ✅ Frontend directories created")
+        except PermissionError:
+            print_error_with_solution(
+                "Permission denied creating frontend directories",
+                "Run as administrator or check directory permissions",
+                "FRONTEND_PERMISSION"
+            )
+            return False
         
         # Test frontend app import
         frontend_app = frontend_dir / "app.py"
         if frontend_app.exists():
-            print("   ✅ Frontend Flask app found")
+            try:
+                # Try to validate the frontend app
+                import tempfile
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as temp_file:
+                    temp_file.write(f"""
+import sys
+sys.path.insert(0, '{frontend_dir.absolute()}')
+try:
+    import app
+    print('Frontend app validation: OK')
+except ImportError as e:
+    print(f'Frontend app validation failed: {{e}}')
+except Exception as e:
+    print(f'Frontend app has issues: {{e}}')
+""")
+                    temp_file.flush()
+                    
+                    validation_result = subprocess.run([
+                        sys.executable, temp_file.name
+                    ], capture_output=True, text=True, timeout=30)
+                    
+                    if "validation: OK" in validation_result.stdout:
+                        print("   ✅ Frontend Flask app validated")
+                    else:
+                        print("   ⚠️  Frontend app has validation issues")
+                        if validation_result.stdout:
+                            print(f"     {validation_result.stdout.strip()}")
+                
+                # Clean up temp file
+                try:
+                    Path(temp_file.name).unlink()
+                except:
+                    pass
+                    
+            except Exception as e:
+                print(f"   ⚠️  Could not validate frontend app: {e}")
         else:
-            print("   ⚠️  Frontend Flask app not found")
+            print_error_with_solution(
+                "Frontend Flask app (app.py) not found",
+                "Ensure frontend/app.py exists or check project structure",
+                "FRONTEND_APP_MISSING"
+            )
         
         print("✅ Frontend setup completed successfully")
         print("   To start frontend: cd frontend && python app.py")
@@ -304,11 +629,23 @@ def setup_frontend():
         return True
         
     except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to install frontend dependencies: {e}")
-        print(f"   Error output: {e.stderr}")
+        handle_subprocess_error(e, "Frontend dependencies installation")
         return False
+        
+    except subprocess.TimeoutExpired:
+        print_error_with_solution(
+            "Frontend installation timed out",
+            "Check internet connection and try again",
+            "FRONTEND_TIMEOUT"
+        )
+        return False
+        
     except Exception as e:
-        print(f"❌ Frontend setup failed: {e}")
+        print_error_with_solution(
+            f"Frontend setup failed: {e}",
+            "Check frontend directory structure and requirements.txt",
+            "FRONTEND_UNKNOWN"
+        )
         return False
 
 def setup_environment():
@@ -464,11 +801,32 @@ def run_health_check():
 def setup_complete():
     """Display setup completion message."""
     print()
-    print("=" * 60)
-    print("🎉 SETUP COMPLETED!")
-    print("=" * 60)
+    print("=" * 80)
+    print("🎉 SETUP COMPLETED SUCCESSFULLY! 🎉")
+    print("=" * 80)
+    print("""
+    ░██████╗███████╗████████╗██╗░░░██╗██████╗░  ░█████╗░░█████╗░███╗░░░███╗██████╗░██╗░░░░░███████╗████████╗███████╗██████╗░
+    ██╔════╝██╔════╝╚══██╔══╝██║░░░██║██╔══██╗  ██╔══██╗██╔══██╗████╗░████║██╔══██╗██║░░░░░██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+    ╚█████╗░█████╗░░░░░██║░░░██║░░░██║██████╔╝  ██║░░╚═╝██║░░██║██╔████╔██║██████╔╝██║░░░░░█████╗░░░░░██║░░░█████╗░░██║░░██║
+    ░╚═══██╗██╔══╝░░░░░██║░░░██║░░░██║██╔═══╝░  ██║░░██╗██║░░██║██║╚██╔╝██║██╔═══╝░██║░░░░░██╔══╝░░░░░██║░░░██╔══╝░░██║░░██║
+    ██████╔╝███████╗░░░██║░░░╚██████╔╝██║░░░░░  ╚█████╔╝╚█████╔╝██║░╚═╝░██║██║░░░░░███████╗███████╗░░░██║░░░███████╗██████╔╝
+    ╚═════╝░╚══════╝░░░╚═╝░░░░╚═════╝░╚═╝░░░░░  ░╚════╝░░╚════╝░╚═╝░░░░░╚═╝╚═╝░░░░░╚══════╝╚══════╝░░░╚═╝░░░╚══════╝╚═════╝░
+    """)
     print()
-    print("Next steps:")
+    
+    # Check if we're in virtual environment
+    in_venv = hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix)
+    venv_exists = Path(".venv").exists()
+    
+    if venv_exists and not in_venv:
+        print("⚠️  IMPORTANT: Activate your virtual environment first!")
+        if platform.system() == "Windows":
+            print("   Command: .venv\\Scripts\\activate")
+        else:
+            print("   Command: source .venv/bin/activate")
+        print()
+    
+    print("🚀 Next steps:")
     print("1. Run health check: python cli.py health")
     print("2. Test TTS: python cli.py test-tts")
     print("3. Test STT: python cli.py test-stt")
@@ -476,25 +834,189 @@ def setup_complete():
     print("5. Start voice assistant: python cli.py run")
     print("6. Start web interface: cd frontend && python app.py")
     print()
-    print("Alternative launch methods:")
+    print("🎯 Alternative launch methods:")
     print("- Simple launcher: python launcher.py")
     print("- Direct app: python app.py")
     print("- Web interface: http://localhost:5000 (after starting frontend)")
     print()
-    print("Configuration files:")
+    print("⚙️  Configuration files:")
     print("- Edit config.yml for voice assistant settings")
     print("- Edit .env for API keys and environment variables")
     print()
-    print("Troubleshooting:")
+    print("🔧 Troubleshooting:")
     print("- For detailed system report: python cli.py health")
     print("- For plugin validation: python -c \"from utils.plugin_validator import *\"")
     print("- Check logs in: logs/voice_assistant.log")
-    print()
+    print("=" * 80)
+
+def print_setup_summary(failed_steps, error_log):
+    """Print a comprehensive setup summary with troubleshooting info."""
+    print("\n" + "=" * 80)
+    if failed_steps:
+        print("⚠️  SETUP COMPLETED WITH ISSUES")
+        print("=" * 80)
+        print(f"📊 Summary: {len(failed_steps)} step(s) failed")
+        print("\n🔴 Failed Steps:")
+        for i, step in enumerate(failed_steps, 1):
+            print(f"   {i}. {step}")
+        
+        print("\n🔧 TROUBLESHOOTING GUIDE:")
+        print("=" * 40)
+        
+        # Specific troubleshooting based on failed steps
+        if any("virtual environment" in step.lower() for step in failed_steps):
+            print("🐍 Virtual Environment Issues:")
+            print("   • Try: python -m venv .venv")
+            print("   • Or: python3 -m venv .venv")
+            print("   • Check Python installation and permissions")
+            print()
+        
+        if any("dependencies" in step.lower() for step in failed_steps):
+            print("📦 Dependency Issues:")
+            print("   • Activate virtual environment first")
+            print("   • Try: pip install --upgrade pip")
+            print("   • Check internet connection")
+            print("   • Manual install: pip install -r requirements.txt")
+            print()
+        
+        if any("frontend" in step.lower() for step in failed_steps):
+            print("🌐 Frontend Issues:")
+            print("   • Check frontend/ directory exists")
+            print("   • Verify frontend/requirements.txt")
+            print("   • Try: cd frontend && pip install -r requirements.txt")
+            print()
+        
+        if any("audio" in step.lower() for step in failed_steps):
+            print("🎵 Audio System Issues:")
+            print("   • Install audio drivers")
+            print("   • Check microphone/speaker connections")
+            print("   • May work without audio for text-only mode")
+            print()
+        
+        print("🆘 RECOVERY OPTIONS:")
+        print("   1. Run recovery mode: python setup_assistant.py --recovery")
+        print("   2. Manual setup: Follow README.md instructions")
+        print("   3. Quick setup: python setup_assistant.py --quick")
+        print("   4. Check logs in: logs/setup_error.log")
+        
+    else:
+        print("🎉 SETUP COMPLETED SUCCESSFULLY!")
+        print("=" * 80)
+        print("✅ All components installed and configured correctly")
+    
+    print("=" * 80)
+
+def log_error_to_file(error_info):
+    """Log error information to a file for debugging."""
+    try:
+        logs_dir = Path("logs")
+        logs_dir.mkdir(exist_ok=True)
+        
+        error_log_file = logs_dir / "setup_error.log"
+        
+        with open(error_log_file, "a", encoding="utf-8") as f:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f"\n{'='*50}\n")
+            f.write(f"Timestamp: {timestamp}\n")
+            f.write(f"Error: {error_info.get('error', 'Unknown')}\n")
+            f.write(f"Step: {error_info.get('step', 'Unknown')}\n")
+            if 'traceback' in error_info:
+                f.write(f"Traceback:\n{error_info['traceback']}\n")
+            f.write(f"{'='*50}\n")
+            
+        print(f"   📝 Error logged to: {error_log_file}")
+    except Exception as e:
+        print(f"   ⚠️  Could not log error: {e}")
+
+def safe_step_execution(step_name, step_func):
+    """Safely execute a setup step with comprehensive error handling."""
+    try:
+        print(f"\n🔄 {step_name}...")
+        result = step_func()
+        if result:
+            print(f"   ✅ {step_name} completed successfully")
+        else:
+            print(f"   ❌ {step_name} failed")
+        return result
+    except KeyboardInterrupt:
+        print(f"\n   ⏹️  {step_name} interrupted by user")
+        print("   Setup cancelled. You can resume by running setup again.")
+        return False
+    except Exception as e:
+        error_info = {
+            'error': str(e),
+            'step': step_name,
+            'traceback': traceback.format_exc()
+        }
+        print(f"   ❌ {step_name} failed with exception: {e}")
+        log_error_to_file(error_info)
+        
+        # Provide step-specific recovery suggestions
+        if "virtual environment" in step_name.lower():
+            print("   💡 Try manually: python -m venv .venv")
+        elif "dependencies" in step_name.lower():
+            print("   💡 Try manually: pip install -r requirements.txt")
+        elif "frontend" in step_name.lower():
+            print("   💡 Try: python setup_assistant.py --frontend")
+        
+        return False
 
 def recovery_mode():
     """Run setup in recovery mode for fixing issues."""
-    print("🔧 RECOVERY MODE")
-    print("=" * 60)
+    print("=" * 80)
+    print("""
+    ██████╗░███████╗░█████╗░░█████╗░██╗░░░██╗███████╗██████╗░██╗░░░██╗  ███╗░░░███╗░█████╗░██████╗░███████╗
+    ██╔══██╗██╔════╝██╔══██╗██╔══██╗██║░░░██║██╔════╝██╔══██╗╚██╗░██╔╝  ████╗░████║██╔══██╗██╔══██╗██╔════╝
+    ██████╔╝█████╗░░██║░░╚═╝██║░░██║╚██╗░██╔╝█████╗░░██████╔╝░╚████╔╝░  ██╔████╔██║██║░░██║██║░░██║█████╗░░
+    ██╔══██╗██╔══╝░░██║░░██╗██║░░██║░╚████╔╝░██╔══╝░░██╔══██╗░░╚██╔╝░░  ██║╚██╔╝██║██║░░██║██║░░██║██╔══╝░░
+    ██║░░██║███████╗╚█████╔╝╚█████╔╝░░╚██╔╝░░███████╗██║░░██║░░░██║░░░  ██║░╚═╝░██║╚█████╔╝██████╔╝███████╗
+    ╚═╝░░╚═╝╚══════╝░╚════╝░░╚════╝░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝░░░╚═╝░░░  ╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚══════╝
+    """)
+    print("🔧 RECOVERY MODE - Fixing Common Issues")
+    print("=" * 80)
+    print("This mode will attempt to fix common issues")
+    print()
+    
+    recovery_steps = [
+        ("Checking prerequisites", check_prerequisites),
+        ("Recreating directories", create_directories),
+        ("Regenerating .env file", setup_environment),
+        ("Regenerating audio assets", generate_audio_assets),
+        ("Testing configuration", validate_configuration),
+    ]
+    
+    failed_recovery_steps = []
+    
+    for step_name, step_func in recovery_steps:
+        if not safe_step_execution(step_name, step_func):
+            failed_recovery_steps.append(step_name)
+    
+    print("\n" + "=" * 80)
+    if failed_recovery_steps:
+        print("⚠️  Recovery completed with some issues")
+        print(f"Failed recovery steps: {', '.join(failed_recovery_steps)}")
+        print("\n💡 Manual recovery suggestions:")
+        print("   1. Check file permissions")
+        print("   2. Ensure you're in the correct directory")
+        print("   3. Try running as administrator")
+        print("   4. Check disk space and internet connection")
+    else:
+        print("✅ Recovery mode completed successfully")
+    
+    print("\nNext step: Try running the full setup again:")
+    print("   python setup_assistant.py")
+    print("=" * 80)
+    print("=" * 80)
+    print("""
+    ██████╗░███████╗░█████╗░░█████╗░██╗░░░██╗███████╗██████╗░██╗░░░██╗  ███╗░░░███╗░█████╗░██████╗░███████╗
+    ██╔══██╗██╔════╝██╔══██╗██╔══██╗██║░░░██║██╔════╝██╔══██╗╚██╗░██╔╝  ████╗░████║██╔══██╗██╔══██╗██╔════╝
+    ██████╔╝█████╗░░██║░░╚═╝██║░░██║╚██╗░██╔╝█████╗░░██████╔╝░╚████╔╝░  ██╔████╔██║██║░░██║██║░░██║█████╗░░
+    ██╔══██╗██╔══╝░░██║░░██╗██║░░██║░╚████╔╝░██╔══╝░░██╔══██╗░░╚██╔╝░░  ██║╚██╔╝██║██║░░██║██║░░██║██╔══╝░░
+    ██║░░██║███████╗╚█████╔╝╚█████╔╝░░╚██╔╝░░███████╗██║░░██║░░░██║░░░  ██║░╚═╝░██║╚█████╔╝██████╔╝███████╗
+    ╚═╝░░╚═╝╚══════╝░╚════╝░░╚════╝░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝░░░╚═╝░░░  ╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚══════╝
+    """)
+    print("🔧 RECOVERY MODE - Fixing Common Issues")
+    print("=" * 80)
     print("This mode will attempt to fix common issues")
     print()
     
@@ -524,86 +1046,142 @@ def main():
             recovery_mode()
             return
         elif sys.argv[1] == "--quick":
-            print("🚀 QUICK SETUP MODE")
-            print("=" * 60)
+            print("=" * 80)
+            print("""
+    ░██████╗░██╗░░░██╗██╗░█████╗░██╗░░██╗  ░██████╗███████╗████████╗██╗░░░██╗██████╗░
+    ██╔═══██╗██║░░░██║██║██╔══██╗██║░██╔╝  ██╔════╝██╔════╝╚══██╔══╝██║░░░██║██╔══██╗
+    ██║██╗██║██║░░░██║██║██║░░╚═╝█████═╝░  ╚█████╗░█████╗░░░░░██║░░░██║░░░██║██████╔╝
+    ╚██████╔╝██║░░░██║██║██║░░██╗██╔═██╗░  ░╚═══██╗██╔══╝░░░░░██║░░░██║░░░██║██╔═══╝░
+    ░╚═██╔═╝░╚██████╔╝██║╚█████╔╝██║░╚██╗  ██████╔╝███████╗░░░██║░░░╚██████╔╝██║░░░░░
+    ░░░╚═╝░░░░╚═════╝░╚═╝░╚════╝░╚═╝░░╚═╝  ╚═════╝░╚══════╝░░░╚═╝░░░░╚═════╝░╚═╝░░░░░
+            """)
+            print("🚀 QUICK SETUP MODE - Essential Components Only")
+            print("=" * 80)
             quick_steps = [
                 ("Checking Python version", check_python_version),
+                ("Setting up virtual environment", setup_virtual_environment),
                 ("Creating directories", create_directories),
                 ("Setting up environment", setup_environment),
                 ("Generating audio assets", generate_audio_assets),
             ]
+            
+            failed_steps = []
             for step_name, step_func in quick_steps:
-                print(f"🔄 {step_name}...")
-                step_func()
-            print("✅ Quick setup completed")
+                if not safe_step_execution(step_name, step_func):
+                    failed_steps.append(step_name)
+            
+            print_setup_summary(failed_steps, {})
             return
+            
         elif sys.argv[1] == "--frontend":
-            print("🌐 FRONTEND SETUP MODE")
-            print("=" * 60)
+            print("=" * 80)
+            print("""
+    ███████╗██████╗░░█████╗░███╗░░██╗████████╗███████╗███╗░░██╗██████╗░  ░██████╗███████╗████████╗██╗░░░██╗██████╗░
+    ██╔════╝██╔══██╗██╔══██╗████╗░██║╚══██╔══╝██╔════╝████╗░██║██╔══██╗  ██╔════╝██╔════╝╚══██╔══╝██║░░░██║██╔══██╗
+    █████╗░░██████╔╝██║░░██║██╔██╗██║░░░██║░░░█████╗░░██╔██╗██║██║░░██║  ╚█████╗░█████╗░░░░░██║░░░██║░░░██║██████╔╝
+    ██╔══╝░░██╔══██╗██║░░██║██║╚████║░░░██║░░░██╔══╝░░██║╚████║██║░░██║  ░╚═══██╗██╔══╝░░░░░██║░░░██║░░░██║██╔═══╝░
+    ██║░░░░░██║░░██║╚█████╔╝██║░╚███║░░░██║░░░███████╗██║░╚███║██████╔╝  ██████╔╝███████╗░░░██║░░░╚██████╔╝██║░░░░░
+    ╚═╝░░░░░╚═╝░░╚═╝░╚════╝░╚═╝░░╚══╝░░░╚═╝░░░╚══════╝╚═╝░░╚══╝╚═════╝░  ╚═════╝░╚══════╝░░░╚═╝░░░░╚═════╝░╚═╝░░░░░
+            """)
+            print("🌐 FRONTEND SETUP MODE - Web Interface Configuration")
+            print("=" * 80)
             frontend_steps = [
                 ("Checking Python version", check_python_version),
+                ("Setting up virtual environment", setup_virtual_environment),
                 ("Setting up frontend", setup_frontend),
             ]
+            
+            failed_steps = []
             for step_name, step_func in frontend_steps:
-                print(f"🔄 {step_name}...")
-                if not step_func():
-                    print(f"❌ {step_name} failed")
-                    return
-            print("✅ Frontend setup completed")
-            print("🌐 Start frontend: cd frontend && python app.py")
-            print("🌐 Web interface: http://localhost:5000")
+                if not safe_step_execution(step_name, step_func):
+                    failed_steps.append(step_name)
+                    break  # Stop on first failure for frontend mode
+            
+            if not failed_steps:
+                print("✅ Frontend setup completed")
+                print("🌐 Start frontend: cd frontend && python app.py")
+                print("🌐 Web interface: http://localhost:5000")
+            else:
+                print_setup_summary(failed_steps, {})
             return
+            
         elif sys.argv[1] == "--help":
             print("Voice Assistant Setup Options:")
-            print("  python setup_assistant.py          # Full setup")
-            print("  python setup_assistant.py --quick  # Quick setup (no dependencies)")
-            print("  python setup_assistant.py --frontend # Setup frontend only")
+            print("  python setup_assistant.py          # Full setup (includes virtual environment)")
+            print("  python setup_assistant.py --quick  # Quick setup (no dependencies, includes venv)")
+            print("  python setup_assistant.py --frontend # Setup frontend only (includes venv)")
             print("  python setup_assistant.py --recovery # Fix common issues")
             print("  python setup_assistant.py --help   # Show this help")
+            print()
+            print("Virtual Environment:")
+            print("  The setup will create a .venv folder with isolated Python packages.")
+            print("  After setup, activate it with:")
+            if platform.system() == "Windows":
+                print("    .venv\\Scripts\\activate")
+            else:
+                print("    source .venv/bin/activate")
+            print()
+            print("Error Handling:")
+            print("  • All errors are logged to logs/setup_error.log")
+            print("  • Use --recovery mode to fix common issues")
+            print("  • Check troubleshooting guide after failed setup")
             return
     
-    print_banner()
-    
-    # Setup steps
-    steps = [
-        ("Checking Python version", check_python_version),
-        ("Checking system requirements", check_system_requirements),
-        ("Checking audio system", check_audio_system),
-        ("Creating directories", create_directories),
-        ("Installing dependencies", install_dependencies),
-        ("Setting up frontend", setup_frontend),
-        ("Checking optional dependencies", check_optional_dependencies),
-        ("Setting up environment", setup_environment),
-        ("Validating configuration", validate_configuration),
-        ("Downloading/checking models", download_models),
-        ("Generating audio assets", generate_audio_assets),
-        ("Testing basic functionality", test_basic_functionality),
-        ("Validating plugins", validate_plugins),
-        ("Running health check", run_health_check)
-    ]
-    
-    failed_steps = []
-    
-    for step_name, step_func in steps:
-        print(f"\n🔄 {step_name}...")
-        try:
-            if not step_func():
+    # Main setup with prerequisites check
+    try:
+        print_banner()
+        
+        # Check prerequisites first
+        if not check_prerequisites():
+            print("\n❌ Prerequisites check failed. Please fix the issues above and try again.")
+            print("💡 Try recovery mode: python setup_assistant.py --recovery")
+            return
+        
+        # Setup steps
+        steps = [
+            ("Checking Python version", check_python_version),
+            ("Setting up virtual environment", setup_virtual_environment),
+            ("Checking system requirements", check_system_requirements),
+            ("Checking audio system", check_audio_system),
+            ("Creating directories", create_directories),
+            ("Installing dependencies", install_dependencies),
+            ("Setting up frontend", setup_frontend),
+            ("Checking optional dependencies", check_optional_dependencies),
+            ("Setting up environment", setup_environment),
+            ("Validating configuration", validate_configuration),
+            ("Downloading/checking models", download_models),
+            ("Generating audio assets", generate_audio_assets),
+            ("Testing basic functionality", test_basic_functionality),
+            ("Validating plugins", validate_plugins),
+            ("Running health check", run_health_check)
+        ]
+        
+        failed_steps = []
+        error_log = {}
+        
+        for step_name, step_func in steps:
+            if not safe_step_execution(step_name, step_func):
                 failed_steps.append(step_name)
-        except Exception as e:
-            print(f"❌ {step_name} failed: {e}")
-            failed_steps.append(step_name)
-    
-    print()
-    if failed_steps:
-        print(f"⚠️  Setup completed with {len(failed_steps)} issue(s):")
-        for step in failed_steps:
-            print(f"   - {step}")
-        print()
-        print("You may need to fix these issues manually.")
-    else:
-        print("✅ All setup steps completed successfully!")
-    
-    setup_complete()
+        
+        print_setup_summary(failed_steps, error_log)
+        
+        if not failed_steps:
+            setup_complete()
+        else:
+            print(f"\n🔧 To fix issues, try:")
+            print(f"   python setup_assistant.py --recovery")
+            
+    except KeyboardInterrupt:
+        print("\n\n⏹️  Setup interrupted by user")
+        print("You can resume setup by running the command again.")
+    except Exception as e:
+        print(f"\n❌ Critical setup error: {e}")
+        print("💡 Try recovery mode: python setup_assistant.py --recovery")
+        log_error_to_file({
+            'error': str(e),
+            'step': 'Main setup',
+            'traceback': traceback.format_exc()
+        })
 
 if __name__ == "__main__":
     main()
