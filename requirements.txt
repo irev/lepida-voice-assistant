@@ -1,38 +1,172 @@
-# Core Dependencies
-torch>=1.9.0
-transformers>=4.20.0
-soundfile>=0.12.1
-numpy>=1.21.0
-PyYAML>=6.0
+# ====================================================================
+# 🎯 LEPIDA VOICE ASSISTANT - Python Dependencies
+# ====================================================================
 
-# Audio Processing
-pyaudio>=0.2.11
-wave
-soundfile
+# ====================================================================
+# 🔧 CORE DEPENDENCIES (Required)
+# ====================================================================
+numpy>=1.21.0           # Numerical computing and audio processing
+soundfile>=0.12.1       # Audio file reading/writing
+PyYAML>=6.0            # Configuration file parsing
+python-dotenv>=0.19.0  # Environment variable loading
+pathlib2>=2.3.0        # Enhanced path handling (Python <3.4 compatibility)
 
-# Optional Dependencies
-pygame>=2.1.0  # For audio playback
-python-dotenv>=0.19.0  # For environment variables
-playsound>=1.3.0  # Alternative audio playback
+# ====================================================================
+# 🤖 AI & MACHINE LEARNING (Core)
+# ====================================================================
+torch>=1.9.0           # PyTorch for AI models
+transformers>=4.20.0   # Hugging Face transformers
+whisper>=20231117      # OpenAI Whisper for speech recognition
 
-# Development Dependencies
-pytest>=6.0.0
-pre-commit>=2.15.0
+# ====================================================================
+# 🔊 AUDIO PROCESSING (Core)
+# ====================================================================
+pyaudio>=0.2.11        # Audio input/output
+wave                   # WAV file processing (built-in)
 
-# Optional: Cloud Services
-# google-cloud-speech>=2.16.0  # Google Speech-to-Text API
+# ====================================================================
+# 🌐 WEB & NETWORKING
+# ====================================================================
+flask>=2.0.0           # Web interface framework
+requests>=2.25.0       # HTTP requests for online services
+urllib3>=1.26.0        # URL handling and HTTP client
 
-# Optional: For advanced STT
-# whisper  # OpenAI Whisper (if using whisper instead of whisper.cpp)
-# openai-whisper>=20231117  # Alternative whisper implementation
+# ====================================================================
+# 📊 SYSTEM MONITORING
+# ====================================================================
+psutil>=5.8.0          # System and process monitoring
 
-# Optional: For wake word detection
-# pvporcupine>=3.0.0  # Picovoice Porcupine
+# ====================================================================
+# 🎵 OPTIONAL AUDIO (Enhanced Features)
+# ====================================================================
+pygame>=2.1.0          # Alternative audio playback
+playsound>=1.3.0       # Simple audio playback
+librosa>=0.10.0        # Advanced audio analysis
+scipy>=1.9.0           # Scientific computing for audio
 
-# Optional: For advanced TTS
-# TTS>=0.22.0  # Coqui TTS
-# piper-tts  # Piper TTS
+# ====================================================================
+# 🧪 DEVELOPMENT & TESTING
+# ====================================================================
+pytest>=6.0.0          # Testing framework
+pytest-asyncio>=0.21.0 # Async testing support
+pre-commit>=2.15.0     # Code quality hooks
 
-# Optional: Additional audio processing
-# librosa>=0.10.0  # Advanced audio analysis
-# scipy>=1.9.0  # Scientific computing for audio processing
+# ====================================================================
+# 🔗 OPTIONAL CLOUD & API SERVICES
+# ====================================================================
+# Uncomment the services you want to use:
+
+# Google Cloud Services
+# google-cloud-speech>=2.16.0     # Google Speech-to-Text API
+# google-cloud-texttospeech>=2.12.0  # Google Text-to-Speech API
+
+# OpenAI Services  
+# openai>=1.0.0                   # OpenAI API client
+
+# Weather & News APIs
+# pyowm>=3.3.0                    # OpenWeatherMap API
+# newsapi-python>=0.2.6           # News API client
+
+# ====================================================================
+# 🎤 OPTIONAL STT ENGINES
+# ====================================================================
+# Alternative Speech-to-Text engines:
+
+# OpenAI Whisper alternatives
+# openai-whisper>=20231117         # Alternative whisper implementation
+# faster-whisper>=0.9.0           # Faster whisper implementation
+
+# Other STT options
+# speechrecognition>=3.10.0       # Multiple STT backends
+# vosk>=0.3.45                    # Offline STT engine
+
+# ====================================================================
+# 🗣️ OPTIONAL TTS ENGINES  
+# ====================================================================
+# Text-to-Speech engine options:
+
+# Coqui TTS (High quality, but large)
+# TTS>=0.22.0                     # Coqui TTS engine
+
+# Piper TTS (Fast, lightweight)
+# piper-tts>=1.2.0                # Piper TTS engine
+
+# eSpeak TTS (Basic, very fast)
+# espeak-ng>=1.51                 # eSpeak TTS engine
+
+# gTTS (Google TTS - requires internet)
+# gtts>=2.3.0                     # Google Text-to-Speech
+
+# ====================================================================
+# 🔊 OPTIONAL WAKE WORD DETECTION
+# ====================================================================
+# Wake word detection engines:
+
+# Picovoice Porcupine (Recommended)
+# pvporcupine>=3.0.0              # Porcupine wake word detection
+
+# Snowboy (Alternative)
+# snowboy>=1.3.0                 # Snowboy wake word detection
+
+# PocketSphinx (Offline)
+# pocketsphinx>=5.0.0             # CMU Sphinx wake word detection
+
+# ====================================================================
+# 🛠️ OPTIONAL DEVELOPMENT TOOLS
+# ====================================================================
+# Development and debugging tools:
+
+# Code quality
+# black>=23.0.0                   # Code formatter
+# isort>=5.12.0                   # Import sorter
+# flake8>=6.0.0                   # Linting
+
+# Documentation
+# sphinx>=7.0.0                   # Documentation generator
+# sphinx-rtd-theme>=1.3.0         # Read the Docs theme
+
+# Performance profiling
+# cProfile                        # Built-in profiler
+# memory-profiler>=0.61.0         # Memory usage profiling
+
+# ====================================================================
+# 🔧 PLATFORM-SPECIFIC DEPENDENCIES
+# ====================================================================
+# Platform-specific packages (uncomment as needed):
+
+# Windows-specific
+# pywin32>=306; sys_platform=="win32"     # Windows API access
+# winsound; sys_platform=="win32"         # Windows sound API
+
+# Linux-specific  
+# python-alsaaudio>=0.9.2; sys_platform=="linux"  # ALSA audio
+# pygobject>=3.42.0; sys_platform=="linux"        # GTK bindings
+
+# macOS-specific
+# pyobjc>=9.0; sys_platform=="darwin"     # macOS API bindings
+
+# ====================================================================
+# 📝 INSTALLATION NOTES
+# ====================================================================
+# 
+# 1. BASIC INSTALLATION:
+#    pip install -r requirements.txt
+#
+# 2. WITH OPTIONAL DEPENDENCIES:
+#    - Uncomment desired optional packages above
+#    - Run: pip install -r requirements.txt
+#
+# 3. DEVELOPMENT INSTALLATION:
+#    - Uncomment development tools section
+#    - Run: pip install -r requirements.txt
+#
+# 4. TROUBLESHOOTING:
+#    - Use virtual environment: python -m venv .venv
+#    - Update pip: pip install --upgrade pip
+#    - For audio issues on Linux: apt-get install python3-pyaudio
+#    - For audio issues on Windows: Use conda instead of pip for pyaudio
+#
+# 5. MINIMAL INSTALLATION (core features only):
+#    pip install numpy soundfile PyYAML python-dotenv torch transformers whisper pyaudio flask requests psutil
+#
+# ====================================================================

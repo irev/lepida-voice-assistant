@@ -1,0 +1,27 @@
+# ====================================================================
+# 🚀 LEPIDA VOICE ASSISTANT - Minimal Requirements
+# ====================================================================
+# Core dependencies only - for basic functionality
+
+# Core dependencies (verified working)
+numpy>=1.21.0
+soundfile>=0.12.1
+PyYAML>=6.0
+python-dotenv>=0.19.0
+
+# AI & ML (verified working)
+torch>=1.9.0
+transformers>=4.20.0
+whisper>=20231117
+
+# Audio processing (verified working)
+pyaudio>=0.2.11
+
+# Web interface
+flask>=2.0.0
+
+# System monitoring (verified working)  
+psutil>=5.8.0
+
+# Networking (verified working)
+requests>=2.25.0

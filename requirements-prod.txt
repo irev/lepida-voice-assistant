@@ -1,0 +1,37 @@
+# ====================================================================
+# 🌐 LEPIDA VOICE ASSISTANT - Production Requirements
+# ====================================================================  
+# Optimized for production deployment
+
+# Core dependencies
+numpy>=1.21.0
+soundfile>=0.12.1
+PyYAML>=6.0
+python-dotenv>=0.19.0
+
+# AI & ML (production versions)
+torch>=1.9.0
+transformers>=4.20.0
+whisper>=20231117
+
+# Audio processing
+pyaudio>=0.2.11
+
+# Web interface (production)
+flask>=2.0.0
+gunicorn>=21.0.0
+waitress>=2.1.0
+
+# System monitoring
+psutil>=5.8.0
+
+# Networking
+requests>=2.25.0
+urllib3>=1.26.0
+
+# Production utilities
+supervisor>=4.2.0
+logrotate>=0.3.0
+
+# Security
+cryptography>=41.0.0
