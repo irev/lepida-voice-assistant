@@ -11,8 +11,13 @@ import shutil
 import platform
 import importlib
 from pathlib import Path
-import traceback
+from datetime import datetime
+import tempfile
+import requests
+import zipfile
+import logging
 import time
+import traceback
 
 class SetupError(Exception):
     """Custom exception for setup-related errors."""
@@ -22,14 +27,84 @@ class SetupError(Exception):
         self.error_code = error_code
         super().__init__(self.message)
 
+def setup_logging():
+    """Setup comprehensive logging for the setup process."""
+    # Create logs directory if it doesn't exist
+    logs_dir = Path("logs")
+    logs_dir.mkdir(exist_ok=True)
+    
+    # Setup log file with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = logs_dir / f"setup_{timestamp}.log"
+    
+    # Configure logging
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file, encoding='utf-8'),
+            logging.StreamHandler()  # Also log to console
+        ]
+    )
+    
+    # Create a custom logger for setup
+    logger = logging.getLogger('setup')
+    logger.info("=" * 80)
+    logger.info("LEPIDA VOICE ASSISTANT - SETUP LOG STARTED")
+    logger.info("=" * 80)
+    logger.info(f"Setup started at: {datetime.now()}")
+    logger.info(f"Python version: {sys.version}")
+    logger.info(f"Platform: {platform.system()} {platform.release()}")
+    logger.info(f"Architecture: {platform.machine()}")
+    logger.info(f"Working directory: {os.getcwd()}")
+    logger.info(f"Log file: {log_file}")
+    logger.info("=" * 80)
+    
+    return logger
+
+def log_step_start(step_name):
+    """Log the start of a setup step."""
+    logger = logging.getLogger('setup')
+    logger.info(f"🔄 STARTING: {step_name}")
+
+def log_step_success(step_name):
+    """Log successful completion of a setup step."""
+    logger = logging.getLogger('setup')
+    logger.info(f"✅ SUCCESS: {step_name}")
+
+def log_step_warning(step_name, warning_msg):
+    """Log a warning for a setup step."""
+    logger = logging.getLogger('setup')
+    logger.warning(f"⚠️  WARNING: {step_name} - {warning_msg}")
+
+def log_step_error(step_name, error_msg, traceback_info=None):
+    """Log an error for a setup step."""
+    logger = logging.getLogger('setup')
+    logger.error(f"❌ ERROR: {step_name} - {error_msg}")
+    if traceback_info:
+        logger.error(f"Traceback:\n{traceback_info}")
+
+def log_system_info(info_dict):
+    """Log system information."""
+    logger = logging.getLogger('setup')
+    logger.info("📊 System Information:")
+    for key, value in info_dict.items():
+        logger.info(f"   {key}: {value}")
+
 def print_error_with_solution(error_msg, solution=None, error_code=None):
     """Print error message with solution suggestions."""
+    logger = logging.getLogger('setup')
     print(f"❌ ERROR: {error_msg}")
+    logger.error(f"ERROR: {error_msg}")
+    
     if error_code:
         print(f"   Error Code: {error_code}")
+        logger.error(f"   Error Code: {error_code}")
     if solution:
         print(f"💡 SOLUTION: {solution}")
+        logger.info(f"   SOLUTION: {solution}")
     print()
+    logger.error("-" * 40)
 
 def handle_subprocess_error(e, operation="Operation"):
     """Handle subprocess errors with detailed information."""
@@ -60,49 +135,68 @@ def handle_subprocess_error(e, operation="Operation"):
 
 def check_prerequisites():
     """Check system prerequisites before starting setup."""
+    logger = logging.getLogger('setup')
+    log_step_start("System Prerequisites Check")
     print("🔍 Checking system prerequisites...")
     
     issues = []
     
     # Check Python version
+    python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    logger.info(f"Python version: {python_version}")
+    
     if sys.version_info < (3, 8):
         issues.append("Python 3.8+ is required")
+        logger.error(f"Python version {python_version} is too old (minimum 3.8)")
+    else:
+        logger.info(f"Python version {python_version} is compatible")
     
     # Check if running as admin on Windows (for some operations)
     if platform.system() == "Windows":
         try:
             import ctypes
             is_admin = ctypes.windll.shell32.IsUserAnAdmin()
+            logger.info(f"Running as administrator: {is_admin}")
         except:
             is_admin = False
+            logger.warning("Could not check administrator status")
         
         if not is_admin:
             print("   ⚠️  Not running as administrator - some operations may fail")
+            log_step_warning("Prerequisites", "Not running as administrator")
     
     # Check available disk space
     try:
         import shutil
         free_space = shutil.disk_usage('.').free / (1024**3)  # GB
+        logger.info(f"Available disk space: {free_space:.2f} GB")
         if free_space < 1:
             issues.append(f"Low disk space: {free_space:.1f}GB available (minimum 1GB required)")
-    except:
-        pass
+            logger.error(f"Insufficient disk space: {free_space:.2f} GB")
+    except Exception as e:
+        logger.warning(f"Could not check disk space: {e}")
     
     # Check internet connectivity
     try:
         import urllib.request
         urllib.request.urlopen('https://pypi.org', timeout=5)
         print("   ✅ Internet connection available")
-    except:
+        logger.info("Internet connection: Available")
+    except Exception as e:
         print("   ⚠️  No internet connection - offline installation only")
+        log_step_warning("Prerequisites", f"No internet connection: {e}")
     
     if issues:
         print("   ❌ Prerequisites check failed:")
+        logger.error("Prerequisites check failed:")
         for issue in issues:
             print(f"     - {issue}")
+            logger.error(f"   - {issue}")
+        log_step_error("System Prerequisites Check", "Prerequisites validation failed")
         return False
     else:
         print("   ✅ Prerequisites check passed")
+        log_step_success("System Prerequisites Check")
         return True
 
 def print_banner():
@@ -498,7 +592,7 @@ def install_dependencies():
     except subprocess.TimeoutExpired:
         print_error_with_solution(
             "Package installation timed out",
-            "Check internet connection and try again, or install packages manually",
+            "Check internet connection and try again",
             "PIP_TIMEOUT"
         )
         return False
@@ -667,18 +761,71 @@ def setup_environment():
 
 def generate_audio_assets():
     """Generate audio assets."""
+    logger = logging.getLogger('setup')
+    log_step_start("Audio Assets Generation")
     print("🎵 Generating audio assets...")
     
     try:
+        # Try importing the audio generation module
         from assets.audio.generate_audio_assets import create_audio_assets
-        create_audio_assets()
-        print("✅ Audio assets generated successfully")
-        return True
-    except Exception as e:
-        print(f"❌ Failed to generate audio assets: {e}")
+        
+        # Create the audio assets
+        success = create_audio_assets()
+        if success:
+            print("✅ Audio assets generated successfully")
+            log_step_success("Audio Assets Generation")
+            return True
+        else:
+            print("❌ Failed to generate audio assets")
+            log_step_error("Audio Assets Generation", "Audio generation function returned False")
+            return False
+            
+    except ImportError as e:
+        missing_dep = str(e).split("'")[1] if "'" in str(e) else str(e)
+        error_msg = f"Missing dependency for audio generation: {missing_dep}"
+        print(f"❌ {error_msg}")
+        
+        if "numpy" in str(e).lower():
+            solution = "Install numpy: pip install numpy"
+            error_code = "AUDIO_NUMPY_MISSING"
+        elif "soundfile" in str(e).lower():
+            solution = "Install soundfile: pip install soundfile"
+            error_code = "AUDIO_SOUNDFILE_MISSING"
+        else:
+            solution = "Install audio dependencies: pip install numpy soundfile"
+            error_code = "AUDIO_DEPS_MISSING"
+        
+        print_error_with_solution(error_msg, solution, error_code)
         print("   You can generate them manually by running:")
         print("   python assets/audio/generate_audio_assets.py")
-        return False
+        
+        log_step_warning("Audio Assets Generation", f"Skipped due to missing dependencies: {missing_dep}")
+        return True  # Don't fail setup for optional audio assets
+        
+    except FileNotFoundError:
+        error_msg = "Audio generation script not found"
+        print(f"❌ {error_msg}")
+        print_error_with_solution(
+            error_msg,
+            "Ensure assets/audio/generate_audio_assets.py exists in the project",
+            "AUDIO_SCRIPT_MISSING"
+        )
+        log_step_warning("Audio Assets Generation", "Audio generation script not found")
+        return True  # Don't fail setup for missing script
+        
+    except Exception as e:
+        error_msg = f"Unexpected error during audio generation: {e}"
+        print(f"❌ {error_msg}")
+        print_error_with_solution(
+            error_msg,
+            "Check file permissions, disk space, and audio system",
+            "AUDIO_UNKNOWN_ERROR"
+        )
+        print("   You can generate them manually by running:")
+        print("   python assets/audio/generate_audio_assets.py")
+        
+        log_step_error("Audio Assets Generation", str(e), traceback.format_exc())
+        return True  # Don't fail setup for audio generation issues
 
 def test_basic_functionality():
     """Test basic functionality."""
@@ -810,7 +957,7 @@ def setup_complete():
     ╚█████╗░█████╗░░░░░██║░░░██║░░░██║██████╔╝  ██║░░╚═╝██║░░██║██╔████╔██║██████╔╝██║░░░░░█████╗░░░░░██║░░░█████╗░░██║░░██║
     ░╚═══██╗██╔══╝░░░░░██║░░░██║░░░██║██╔═══╝░  ██║░░██╗██║░░██║██║╚██╔╝██║██╔═══╝░██║░░░░░██╔══╝░░░░░██║░░░██╔══╝░░██║░░██║
     ██████╔╝███████╗░░░██║░░░╚██████╔╝██║░░░░░  ╚█████╔╝╚█████╔╝██║░╚═╝░██║██║░░░░░███████╗███████╗░░░██║░░░███████╗██████╔╝
-    ╚═════╝░╚══════╝░░░╚═╝░░░░╚═════╝░╚═╝░░░░░  ░╚════╝░░╚════╝░╚═╝░░░░░╚═╝╚═╝░░░░░╚══════╝╚══════╝░░░╚═╝░░░╚══════╝╚═════╝░
+    ╚═════╝░╚══════╝░░░╚═╝░░░░╚════╝░╚═╝░░░░░  ░╚════╝░░╚════╝░╚═╝░░░░░╚═╝╚═╝░░░░░╚══════╝╚══════╝░░░╚═╝░░░╚══════╝╚═════╝░
     """)
     print()
     
@@ -908,6 +1055,7 @@ def print_setup_summary(failed_steps, error_log):
 
 def log_error_to_file(error_info):
     """Log error information to a file for debugging."""
+    logger = logging.getLogger('setup')
     try:
         logs_dir = Path("logs")
         logs_dir.mkdir(exist_ok=True)
@@ -925,23 +1073,39 @@ def log_error_to_file(error_info):
             f.write(f"{'='*50}\n")
             
         print(f"   📝 Error logged to: {error_log_file}")
+        logger.info(f"Error details logged to: {error_log_file}")
     except Exception as e:
         print(f"   ⚠️  Could not log error: {e}")
+        logger.warning(f"Could not log error to file: {e}")
 
 def safe_step_execution(step_name, step_func):
     """Safely execute a setup step with comprehensive error handling."""
+    logger = logging.getLogger('setup')
+    
     try:
+        log_step_start(step_name)
         print(f"\n🔄 {step_name}...")
+        
+        start_time = time.time()
         result = step_func()
+        end_time = time.time()
+        execution_time = end_time - start_time
+        
         if result:
             print(f"   ✅ {step_name} completed successfully")
+            log_step_success(f"{step_name} (executed in {execution_time:.2f}s)")
         else:
             print(f"   ❌ {step_name} failed")
+            log_step_error(step_name, "Step function returned False")
+        
         return result
+        
     except KeyboardInterrupt:
         print(f"\n   ⏹️  {step_name} interrupted by user")
         print("   Setup cancelled. You can resume by running setup again.")
+        log_step_error(step_name, "Interrupted by user")
         return False
+        
     except Exception as e:
         error_info = {
             'error': str(e),
@@ -949,15 +1113,19 @@ def safe_step_execution(step_name, step_func):
             'traceback': traceback.format_exc()
         }
         print(f"   ❌ {step_name} failed with exception: {e}")
+        log_step_error(step_name, str(e), traceback.format_exc())
         log_error_to_file(error_info)
         
         # Provide step-specific recovery suggestions
         if "virtual environment" in step_name.lower():
             print("   💡 Try manually: python -m venv .venv")
+            logger.info("   Recovery suggestion: python -m venv .venv")
         elif "dependencies" in step_name.lower():
             print("   💡 Try manually: pip install -r requirements.txt")
+            logger.info("   Recovery suggestion: pip install -r requirements.txt")
         elif "frontend" in step_name.lower():
             print("   💡 Try: python setup_assistant.py --frontend")
+            logger.info("   Recovery suggestion: python setup_assistant.py --frontend")
         
         return False
 
@@ -1037,15 +1205,136 @@ def recovery_mode():
     print("\n✅ Recovery mode completed")
     print("Try running the full setup again: python setup_assistant.py")
 
+# --- FFMPEG SETUP STEP ---
+def setup_ffmpeg():
+    """Check and setup ffmpeg for audio processing."""
+    print("🔎 Checking ffmpeg installation...")
+    import shutil
+    ffmpeg_bin_path = os.path.abspath(os.path.join("bin", "ffmpeg", "ffmpeg.exe"))
+    ffmpeg_path = shutil.which("ffmpeg")
+    if ffmpeg_path or os.path.isfile(ffmpeg_bin_path):
+        found_path = ffmpeg_path if ffmpeg_path else ffmpeg_bin_path
+        print(f"   ✅ ffmpeg found: {found_path}")
+        return True
+    system = platform.system()
+    arch = platform.machine().lower()
+    # Use n7.1-latest release pattern
+    ffmpeg_base_url = "https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/"
+    ffmpeg_filename = None
+    if system == "Windows":
+        print("   ❌ ffmpeg not found on PATH. Attempting automatic download...")
+        if "arm" in arch or "aarch" in arch:
+            ffmpeg_filename = "ffmpeg-n7.1-latest-winarm64-lgpl-shared-7.1.zip"
+        elif "64" in arch:
+            ffmpeg_filename = "ffmpeg-n7.1-latest-win64-lgpl-shared-7.1.zip"
+        else:
+            ffmpeg_filename = "ffmpeg-n7.1-latest-win32-lgpl-shared-7.1.zip"
+        ffmpeg_url = ffmpeg_base_url + ffmpeg_filename
+        try:
+            print(f"   Downloading ffmpeg from: {ffmpeg_url}")
+            temp_zip = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+            with requests.get(ffmpeg_url, stream=True) as r:
+                r.raise_for_status()
+                for chunk in r.iter_content(chunk_size=8192):
+                    temp_zip.write(chunk)
+            temp_zip.close()
+            print("   Extracting ffmpeg to bin/ffmpeg ...")
+            extract_dir = os.path.join("bin", "ffmpeg")
+            os.makedirs(extract_dir, exist_ok=True)
+            with zipfile.ZipFile(temp_zip.name, 'r') as zip_ref:
+                zip_ref.extractall(extract_dir)
+            # Flatten extracted structure: move all files from versioned subfolder to bin/ffmpeg
+            # Find the first subfolder (usually ffmpeg-n7.1-latest-win32-lgpl-shared-7.1)
+            subfolders = [f for f in os.listdir(extract_dir) if os.path.isdir(os.path.join(extract_dir, f))]
+            if subfolders:
+                versioned_dir = os.path.join(extract_dir, subfolders[0])
+                # Move all files from versioned_dir to extract_dir
+                for root, dirs, files in os.walk(versioned_dir):
+                    for file in files:
+                        src_file = os.path.join(root, file)
+                        rel_path = os.path.relpath(src_file, versioned_dir)
+                        dest_file = os.path.join(extract_dir, rel_path)
+                        dest_folder = os.path.dirname(dest_file)
+                        os.makedirs(dest_folder, exist_ok=True)
+                        shutil.move(src_file, dest_file)
+                # Remove the now-empty versioned_dir
+                try:
+                    shutil.rmtree(versioned_dir)
+                except Exception as rm_err:
+                    print(f"   ⚠️  Failed to remove versioned folder: {rm_err}")
+            # Find ffmpeg.exe in bin/ffmpeg
+            ffmpeg_exe = None
+            for root, dirs, files in os.walk(extract_dir):
+                for file in files:
+                    if file.lower() == "ffmpeg.exe":
+                        ffmpeg_exe = os.path.join(root, file)
+                        break
+            # Ensure ffmpeg.exe is at bin/ffmpeg/ffmpeg.exe
+            ffmpeg_target = os.path.join(extract_dir, "ffmpeg.exe")
+            if ffmpeg_exe and os.path.isfile(ffmpeg_exe):
+                if ffmpeg_exe != ffmpeg_target:
+                    try:
+                        shutil.copy2(ffmpeg_exe, ffmpeg_target)
+                        print(f"   ffmpeg.exe copied to: {ffmpeg_target}")
+                    except Exception as move_err:
+                        print(f"   ⚠️  Failed to copy ffmpeg.exe to bin/ffmpeg: {move_err}")
+                ffmpeg_exe = ffmpeg_target
+            # Check if bin/ffmpeg/ffmpeg.exe exists
+            if os.path.isfile(ffmpeg_target):
+                print(f"   ✅ ffmpeg extracted: {ffmpeg_target}")
+                os.environ["FFMPEG_PATH"] = ffmpeg_target
+                print(f"   FFMPEG_PATH set for application: {ffmpeg_target}")
+                os.environ["PATH"] = os.path.dirname(ffmpeg_target) + os.pathsep + os.environ.get("PATH", "")
+                print(f"   PATH updated for ffmpeg usage.")
+                return True
+            else:
+                print("   ❌ bin/ffmpeg/ffmpeg.exe not found after extraction. Please download manually.")
+                print("   Download: https://github.com/BtbN/FFmpeg-Builds/releases")
+                return False
+        except Exception as e:
+            print(f"   ❌ ffmpeg download error: {e}")
+            print("   Please download manually from https://github.com/BtbN/FFmpeg-Builds/releases")
+            return False
+    elif system in ("Linux", "Darwin"):
+        print("   ❌ ffmpeg not found. Attempting automatic install...")
+        try:
+            subprocess.run(["sudo", "apt-get", "update"], check=True)
+            subprocess.run(["sudo", "apt-get", "install", "-y", "ffmpeg"], check=True)
+            ffmpeg_path = shutil.which("ffmpeg")
+            if ffmpeg_path:
+                print(f"   ✅ ffmpeg installed: {ffmpeg_path}")
+                return True
+            else:
+                print("   ❌ ffmpeg install failed. Please install manually.")
+                print("   Try: sudo apt-get install ffmpeg")
+                return False
+        except Exception as e:
+            print(f"   ❌ ffmpeg install error: {e}")
+            print("   Please install ffmpeg manually and rerun setup.")
+            print("   Download: https://github.com/BtbN/FFmpeg-Builds/releases")
+            return False
+    else:
+        print(f"   ❌ ffmpeg not found. Please install ffmpeg for {system}.")
+        print("   Download: https://github.com/BtbN/FFmpeg-Builds/releases")
+        return False
+
+# main() and rest of the code
 def main():
     """Main setup function."""
     
+    # Setup logging first
+    logger = setup_logging()
+    
     # Parse command line arguments
     if len(sys.argv) > 1:
+        logger.info(f"Setup mode: {sys.argv[1]}")
+        
         if sys.argv[1] == "--recovery":
+            logger.info("Starting recovery mode")
             recovery_mode()
             return
         elif sys.argv[1] == "--quick":
+            logger.info("Starting quick setup mode")
             print("=" * 80)
             print("""
     ░██████╗░██╗░░░██╗██╗░█████╗░██╗░░██╗  ░██████╗███████╗████████╗██╗░░░██╗██████╗░
@@ -1070,18 +1359,20 @@ def main():
                 if not safe_step_execution(step_name, step_func):
                     failed_steps.append(step_name)
             
+            logger.info(f"Quick setup completed. Failed steps: {len(failed_steps)}")
             print_setup_summary(failed_steps, {})
             return
             
         elif sys.argv[1] == "--frontend":
+            logger.info("Starting frontend setup mode")
             print("=" * 80)
             print("""
     ███████╗██████╗░░█████╗░███╗░░██╗████████╗███████╗███╗░░██╗██████╗░  ░██████╗███████╗████████╗██╗░░░██╗██████╗░
     ██╔════╝██╔══██╗██╔══██╗████╗░██║╚══██╔══╝██╔════╝████╗░██║██╔══██╗  ██╔════╝██╔════╝╚══██╔══╝██║░░░██║██╔══██╗
-    █████╗░░██████╔╝██║░░██║██╔██╗██║░░░██║░░░█████╗░░██╔██╗██║██║░░██║  ╚█████╗░█████╗░░░░░██║░░░██║░░░██║██████╔╝
-    ██╔══╝░░██╔══██╗██║░░██║██║╚████║░░░██║░░░██╔══╝░░██║╚████║██║░░██║  ░╚═══██╗██╔══╝░░░░░██║░░░██║░░░██║██╔═══╝░
+    █████╗░░██████╔╝██║░░██║██╔██╗██║░░░██║░░░█████╗░░██╔██╗██║██║░░██║  ╚█████╗░█████╗░░░░██║░░░██║░░░██║██████╔╝
+    ██╔══╝░░██╔══██╗██║░░██║██║╚████║░░░██║░░░██╔══╝░░██║╚████║██║░░██║  ░╚═══██╗██╔══╝░░░░██║░░░██║░░░██║██╔═══╝░
     ██║░░░░░██║░░██║╚█████╔╝██║░╚███║░░░██║░░░███████╗██║░╚███║██████╔╝  ██████╔╝███████╗░░░██║░░░╚██████╔╝██║░░░░░
-    ╚═╝░░░░░╚═╝░░╚═╝░╚════╝░╚═╝░░╚══╝░░░╚═╝░░░╚══════╝╚═╝░░╚══╝╚═════╝░  ╚═════╝░╚══════╝░░░╚═╝░░░░╚═════╝░╚═╝░░░░░
+    ╚═╝░░░░░╚═╝░░╚═╝░╚════╝░╚═╝░░╚══╝░░░╚═╝░░░╚══════╝╚═╝░░╚══╝╚═════╝░  ╚═════╝░╚══════╝░░░╚═╝░░░░╚═════╝░╚═════╝░
             """)
             print("🌐 FRONTEND SETUP MODE - Web Interface Configuration")
             print("=" * 80)
@@ -1101,11 +1392,14 @@ def main():
                 print("✅ Frontend setup completed")
                 print("🌐 Start frontend: cd frontend && python app.py")
                 print("🌐 Web interface: http://localhost:5000")
+                logger.info("Frontend setup completed successfully")
             else:
+                logger.error(f"Frontend setup failed. Failed steps: {failed_steps}")
                 print_setup_summary(failed_steps, {})
             return
             
         elif sys.argv[1] == "--help":
+            logger.info("Displaying help information")
             print("Voice Assistant Setup Options:")
             print("  python setup_assistant.py          # Full setup (includes virtual environment)")
             print("  python setup_assistant.py --quick  # Quick setup (no dependencies, includes venv)")
@@ -1129,10 +1423,12 @@ def main():
     
     # Main setup with prerequisites check
     try:
+        logger.info("Starting full setup mode")
         print_banner()
         
         # Check prerequisites first
         if not check_prerequisites():
+            logger.error("Prerequisites check failed - aborting setup")
             print("\n❌ Prerequisites check failed. Please fix the issues above and try again.")
             print("💡 Try recovery mode: python setup_assistant.py --recovery")
             return
@@ -1143,6 +1439,7 @@ def main():
             ("Setting up virtual environment", setup_virtual_environment),
             ("Checking system requirements", check_system_requirements),
             ("Checking audio system", check_audio_system),
+            ("Checking ffmpeg installation", setup_ffmpeg),
             ("Creating directories", create_directories),
             ("Installing dependencies", install_dependencies),
             ("Setting up frontend", setup_frontend),
@@ -1156,6 +1453,7 @@ def main():
             ("Running health check", run_health_check)
         ]
         
+        logger.info(f"Starting {len(steps)} setup steps")
         failed_steps = []
         error_log = {}
         
@@ -1163,18 +1461,27 @@ def main():
             if not safe_step_execution(step_name, step_func):
                 failed_steps.append(step_name)
         
+        logger.info(f"Setup completed. Failed steps: {len(failed_steps)}/{len(steps)}")
+        if failed_steps:
+            logger.error(f"Failed steps: {', '.join(failed_steps)}")
+        
         print_setup_summary(failed_steps, error_log)
         
         if not failed_steps:
+            logger.info("Setup completed successfully - all steps passed")
             setup_complete()
         else:
+            logger.warning(f"Setup completed with {len(failed_steps)} failed steps")
             print(f"\n🔧 To fix issues, try:")
             print(f"   python setup_assistant.py --recovery")
             
     except KeyboardInterrupt:
+        logger.warning("Setup interrupted by user")
         print("\n\n⏹️  Setup interrupted by user")
         print("You can resume setup by running the command again.")
     except Exception as e:
+        logger.critical(f"Critical setup error: {e}")
+        logger.critical(f"Traceback:\n{traceback.format_exc()}")
         print(f"\n❌ Critical setup error: {e}")
         print("💡 Try recovery mode: python setup_assistant.py --recovery")
         log_error_to_file({
@@ -1182,6 +1489,9 @@ def main():
             'step': 'Main setup',
             'traceback': traceback.format_exc()
         })
+    finally:
+        logger.info("Setup session ended")
+        logger.info("=" * 80)
 
 if __name__ == "__main__":
     main()

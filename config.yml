@@ -36,6 +36,7 @@ stt:
   fallback_engines: ["google_stt"]
   language: "id"
   model_size: "base"
+  recording_duration: 5  # Duration in seconds for microphone input
   
 # Wake Word Detection
 wakeword:

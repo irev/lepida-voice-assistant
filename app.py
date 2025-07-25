@@ -117,11 +117,12 @@ class VoiceAssistant:
             except Exception as e:
                 self.logger.error(f"Failed to speak text: {e}")
     
-    def listen(self):
+    def listen(self, duration=5):
         """Listen for audio input and convert to text."""
         if self.stt:
             try:
-                return self.stt.transcribe_audio()
+                # Use live transcription for microphone input
+                return self.stt.transcribe_live(duration)
             except Exception as e:
                 self.logger.error(f"Failed to listen for audio: {e}")
                 return None
@@ -150,11 +151,17 @@ class VoiceAssistant:
                 choice = input("Pilih opsi (1-6): ").strip()
                 
                 if choice == "1":
-                    print("Mendengarkan... (tekan Ctrl+C untuk berhenti)")
+                    print("Mendengarkan... Silakan bicara ke mikrofon!")
                     if self.audio_effects:
                         self.audio_effects.play_start()
                     
-                    text = self.listen()
+                    # Get recording duration from config or default
+                    duration = self.config.get('stt.recording_duration', 5)
+                    if not isinstance(duration, int):
+                        duration = 5  # fallback to default
+                    print(f"Merekam selama {duration} detik...")
+                    
+                    text = self.listen(duration)
                     if text:
                         print(f"Anda berkata: {text}")
                         
@@ -169,7 +176,8 @@ class VoiceAssistant:
                         if self.audio_effects:
                             self.audio_effects.play_success()
                     else:
-                        print("Tidak ada suara yang terdeteksi.")
+                        print("Tidak ada suara yang terdeteksi atau gagal melakukan transcripsi.")
+                        print("Pastikan mikrofon berfungsi dan berbicara dengan jelas.")
                         if self.audio_effects:
                             self.audio_effects.play_error()
                 
