@@ -203,7 +203,7 @@ Lepida-Voice-Assistant/
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd facebook-seacker
+cd lepida-voice-assistant
 
 # Run automated setup
 python setup_assistant.py
@@ -217,7 +217,7 @@ python setup_assistant.py --frontend  # Include web interface setup
 #### 1. Clone and Install Dependencies
 ```bash
 git clone <repository-url>
-cd facebook-seacker
+cd lepida-voice-assistant
 pip install -r requirements.txt
 ```
 
@@ -634,7 +634,7 @@ def test_tts_plugin():
 ```bash
 # Clone and setup development environment
 git clone <repository-url>
-cd facebook-seacker
+cd lepida-voice-assistant
 python setup_assistant.py --dev
 
 # Install development dependencies
