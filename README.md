@@ -1,6 +1,18 @@
 # 🎤 Lepida Voice Assistant
 
-A powerful, modular voice assistant application designed for offline/online operation with advanced AI technologies. Features complete Indonesian language support, plugin-based architecture, and comprehensive system monitoring.
+<div align="center">
+  <img src="assets/logo/lepida_logo.svg" alt="Lepida Voice Assistant Logo" width="200">
+  
+  **A powerful, modular voice assistant application designed for offline/online operation with advanced AI technologies.**
+  
+  *Features complete Indonesian language support, plugin-based architecture, and comprehensive system monitoring.*
+  
+  [![GitHub Repository](https://img.shields.io/badge/GitHub-lepida--voice--assistant-blue?style=for-the-badge&logo=github)](https://github.com/irev/lepida-voice-assistant)
+  [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+  [![Python](https://img.shields.io/badge/Python-3.8+-yellow?style=for-the-badge&logo=python)](https://python.org)
+</div>
+
+---
 
 ## 🌟 Key Highlights
 
@@ -182,22 +194,7 @@ Lepida-Voice-Assistant/
 ├── temp/                       # Temporary files
 └── .github/
     └── copilot-instructions.md # AI assistant instructions
-```
-
-**Legend:** ⭐ = Recently added/enhanced components
-│   ├── tts_mms_tts.py          # MMS TTS plugin
-│   ├── stt_whisper_cpp.py      # Whisper.cpp STT plugin
-│   └── soundfx_beep.py         # Simple sound effects
-│
-├── utils/
-│   ├── audio_transcription.py  # Audio transcription from various engines
-│   └── text_to_speech.py       # TTS engine wrapper
-│
-├── test/                       # Unit tests
-│   └── _test.py
-│
-└── .github/
-    └── copilot-instructions.md
+    
 ```
 
 ## 🛠️ Quick Installation
@@ -871,28 +868,47 @@ When reporting issues, please include:
 - 🤝 Contribute code or documentation
 - 📢 Share with others who might find it useful
 
+## 🔗 Links & Resources
+
+- **📚 [GitHub Repository](https://github.com/irev/lepida-voice-assistant)** - Main project repository
+- **🐛 [Issue Tracker](https://github.com/irev/lepida-voice-assistant/issues)** - Report bugs and request features
+- **📖 [Documentation](https://github.com/irev/lepida-voice-assistant/wiki)** - Complete project documentation
+- **💬 [Discussions](https://github.com/irev/lepida-voice-assistant/discussions)** - Community discussions
+- **📋 [Project Board](https://github.com/irev/lepida-voice-assistant/projects)** - Development roadmap
+- **📦 [Releases](https://github.com/irev/lepida-voice-assistant/releases)** - Download latest versions
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ---
 
-## 🎉 **Quick Start Summary**
+<div align="center">
+  <img src="assets/logo/lepida_logo.svg" alt="Lepida Voice Assistant" width="150">
+  
+  ## 🎉 **Quick Start Summary**
 
-```bash
-# 1. Clone and setup
-git clone <repository-url>
-cd facebook-seacker
-python setup_assistant.py
+  ```bash
+  # 1. Clone and setup
+  git clone https://github.com/irev/lepida-voice-assistant.git
+  cd lepida-voice-assistant
+  python setup_assistant.py
 
-# 2. Test the system
-python test/test_global.py
+  # 2. Test the system
+  python test/test_global.py
 
-# 3. Start voice assistant
-python app.py
+  # 3. Start voice assistant
+  python app.py
 
-# 4. Open web interface (optional)
-cd frontend && python app.py
-# Browse to: http://localhost:5000
-```
+  # 4. Open web interface (optional)
+  cd frontend && python app.py
+  # Browse to: http://localhost:5000
+  ```
 
-**🎤 Ready to use Lepida Voice Assistant! 🇮🇩**
+  **🎤 Ready to use Lepida Voice Assistant! 🇮🇩**
+  
+  [![GitHub](https://img.shields.io/badge/View%20on%20GitHub-lepida--voice--assistant-blue?style=for-the-badge&logo=github)](https://github.com/irev/lepida-voice-assistant)
+</div>
 
 ---
 

@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lepida Voice Assistant - Control Panel</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="../assets/logo/lepida_logo_small.svg" type="image/svg+xml">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="static/css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -16,9 +18,15 @@
                     <i class="fas fa-microphone"></i>
                     <h1>Lepida Voice Assistant</h1>
                 </div>
-                <div class="status-indicator">
-                    <span class="status-dot" id="statusDot"></span>
-                    <span id="statusText">Disconnected</span>
+                <div class="header-actions">
+                    <a href="https://github.com/irev/lepida-voice-assistant" target="_blank" rel="noopener noreferrer" class="github-link">
+                        <i class="fab fa-github"></i>
+                        <span>GitHub</span>
+                    </a>
+                    <div class="status-indicator">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span id="statusText">Disconnected</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -442,6 +450,14 @@
                                 <span class="label">Assistant Version:</span>
                                 <span class="value">1.0.0</span>
                             </div>
+                            <div class="info-item">
+                                <span class="label">Repository:</span>
+                                <span class="value">
+                                    <a href="https://github.com/irev/lepida-voice-assistant" target="_blank" rel="noopener noreferrer" class="repo-link">
+                                        <i class="fab fa-github"></i> lepida-voice-assistant
+                                    </a>
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -491,6 +507,29 @@
                 <div class="console-line">[INFO] Frontend interface loaded successfully</div>
             </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p>&copy; 2025 Lepida Voice Assistant. Built with ❤️ for offline voice interaction.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/irev/lepida-voice-assistant" target="_blank" rel="noopener noreferrer" class="footer-link">
+                        <i class="fab fa-github"></i>
+                        View on GitHub
+                    </a>
+                    <a href="https://github.com/irev/lepida-voice-assistant/issues" target="_blank" rel="noopener noreferrer" class="footer-link">
+                        <i class="fas fa-bug"></i>
+                        Report Issue
+                    </a>
+                    <a href="https://github.com/irev/lepida-voice-assistant/wiki" target="_blank" rel="noopener noreferrer" class="footer-link">
+                        <i class="fas fa-book"></i>
+                        Documentation
+                    </a>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <!-- Scripts -->

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <!-- Monochrome gradients -->
+    <linearGradient id="wingGradientMono" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a5568;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2d3748;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a202c;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="bodyGradientMono" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a202c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Shadow effect -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  
+  <!-- Sayap atas kiri -->
+  <path d="M 80 70 Q 50 40 30 60 Q 25 75 40 85 Q 60 95 80 85 Z" 
+        fill="url(#wingGradientMono)" 
+        filter="url(#shadow)"
+        opacity="0.9"/>
+  
+  <!-- Sayap atas kanan -->
+  <path d="M 120 70 Q 150 40 170 60 Q 175 75 160 85 Q 140 95 120 85 Z" 
+        fill="url(#wingGradientMono)" 
+        filter="url(#shadow)"
+        opacity="0.9"/>
+  
+  <!-- Sayap bawah kiri -->
+  <path d="M 85 110 Q 45 130 35 150 Q 40 165 55 160 Q 75 150 85 130 Z" 
+        fill="url(#wingGradientMono)" 
+        filter="url(#shadow)"
+        opacity="0.8"/>
+  
+  <!-- Sayap bawah kanan -->
+  <path d="M 115 110 Q 155 130 165 150 Q 160 165 145 160 Q 125 150 115 130 Z" 
+        fill="url(#wingGradientMono)" 
+        filter="url(#shadow)"
+        opacity="0.8"/>
+  
+  <!-- Badan kupu-kupu -->
+  <ellipse cx="100" cy="100" rx="4" ry="45" fill="url(#bodyGradientMono)" filter="url(#shadow)"/>
+  
+  <!-- Antena -->
+  <path d="M 96 60 Q 92 45 88 40" 
+        stroke="#1a202c" 
+        stroke-width="2" 
+        fill="none" 
+        stroke-linecap="round"/>
+  <circle cx="88" cy="40" r="2" fill="#4a5568"/>
+  
+  <path d="M 104 60 Q 108 45 112 40" 
+        stroke="#1a202c" 
+        stroke-width="2" 
+        fill="none" 
+        stroke-linecap="round"/>
+  <circle cx="112" cy="40" r="2" fill="#4a5568"/>
+  
+  <!-- Detail sayap (pola) -->
+  <circle cx="60" cy="65" r="3" fill="#ffffff" opacity="0.4"/>
+  <circle cx="55" cy="75" r="2" fill="#ffffff" opacity="0.3"/>
+  <circle cx="140" cy="65" r="3" fill="#ffffff" opacity="0.4"/>
+  <circle cx="145" cy="75" r="2" fill="#ffffff" opacity="0.3"/>
+  <circle cx="65" cy="135" r="2.5" fill="#ffffff" opacity="0.3"/>
+  <circle cx="135" cy="135" r="2.5" fill="#ffffff" opacity="0.3"/>
+  
+  <!-- Highlight pada badan -->
+  <ellipse cx="98" cy="95" rx="1" ry="15" fill="#ffffff" opacity="0.2"/>
+</svg>

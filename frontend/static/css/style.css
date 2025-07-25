@@ -53,6 +53,38 @@ body {
     margin: 0 auto;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.github-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--background-color);
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.github-link:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.05);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.github-link i {
+    font-size: 1.2rem;
+}
+
 .logo {
     display: flex;
     align-items: center;
@@ -220,6 +252,24 @@ body {
 .value {
     font-weight: 600;
     color: var(--dark-color);
+}
+
+.repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: color 0.2s ease;
+}
+
+.repo-link:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+.repo-link i {
+    font-size: 1rem;
 }
 
 /* Performance Items */
@@ -492,10 +542,64 @@ body {
     color: var(--danger-color);
 }
 
+/* Footer Styles */
+.footer {
+    background: var(--background-color);
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+    padding: 1.5rem 2rem;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer-info p {
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.footer-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+    transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+    color: var(--primary-color);
+}
+
+.footer-link i {
+    font-size: 1rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .header-content {
         padding: 1rem;
+    }
+    
+    .header-actions {
+        gap: 1rem;
+    }
+    
+    .github-link span {
+        display: none;
     }
     
     .navigation {
@@ -509,6 +613,15 @@ body {
     .nav-link {
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-links {
+        justify-content: center;
     }
     
     .main-content {

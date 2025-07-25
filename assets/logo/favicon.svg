@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="wingGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="wingGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#43e97b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Simplified butterfly for favicon -->
+  <!-- Sayap atas kiri -->
+  <path d="M 12.8 11.2 Q 8 6.4 4.8 9.6 Q 4 12 6.4 13.6 Q 9.6 15.2 12.8 13.6 Z" 
+        fill="url(#wingGradient1)"/>
+  
+  <!-- Sayap atas kanan -->
+  <path d="M 19.2 11.2 Q 24 6.4 27.2 9.6 Q 28 12 25.6 13.6 Q 22.4 15.2 19.2 13.6 Z" 
+        fill="url(#wingGradient1)"/>
+  
+  <!-- Sayap bawah kiri -->
+  <path d="M 13.6 17.6 Q 7.2 20.8 5.6 24 Q 6.4 26.4 8.8 25.6 Q 12 24 13.6 20.8 Z" 
+        fill="url(#wingGradient2)"/>
+  
+  <!-- Sayap bawah kanan -->
+  <path d="M 18.4 17.6 Q 24.8 20.8 26.4 24 Q 25.6 26.4 23.2 25.6 Q 20 24 18.4 20.8 Z" 
+        fill="url(#wingGradient2)"/>
+  
+  <!-- Badan -->
+  <ellipse cx="16" cy="16" rx="0.8" ry="7.2" fill="#2c3e50"/>
+  
+  <!-- Antena sederhana -->
+  <circle cx="14.4" cy="8" r="0.8" fill="#e74c3c"/>
+  <circle cx="17.6" cy="8" r="0.8" fill="#e74c3c"/>
+</svg>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <!-- Enhanced gradients for high resolution -->
+    <radialGradient id="wingGradient1" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#a8edea;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+    </radialGradient>
+    
+    <radialGradient id="wingGradient2" cx="50%" cy="70%" r="70%">
+      <stop offset="0%" style="stop-color:#a8edea;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#4facfe;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#00f2fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#43e97b;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2c3e50;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#34495e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2c3e50;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Enhanced shadow and glow effects -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+    
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Inner shadow for depth -->
+    <filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur stdDeviation="3" result="offset-blur"/>
+      <feFlood flood-color="#000000" flood-opacity="0.1"/>
+      <feComposite in2="offset-blur" operator="in"/>
+      <feMerge> 
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle dengan subtle gradient -->
+  <circle cx="200" cy="200" r="190" fill="none" stroke="url(#wingGradient1)" stroke-width="2" opacity="0.1"/>
+  
+  <!-- Sayap atas kiri dengan detail yang lebih halus -->
+  <path d="M 160 140 Q 100 80 60 120 Q 50 150 80 170 Q 120 190 160 170 Z" 
+        fill="url(#wingGradient1)" 
+        filter="url(#shadow)"
+        opacity="0.95">
+    <animateTransform attributeName="transform" 
+                      type="rotate" 
+                      values="0 130 150;-3 130 150;0 130 150" 
+                      dur="4s" 
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Sayap atas kanan -->
+  <path d="M 240 140 Q 300 80 340 120 Q 350 150 320 170 Q 280 190 240 170 Z" 
+        fill="url(#wingGradient1)" 
+        filter="url(#shadow)"
+        opacity="0.95">
+    <animateTransform attributeName="transform" 
+                      type="rotate" 
+                      values="0 270 150;3 270 150;0 270 150" 
+                      dur="4s" 
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Sayap bawah kiri -->
+  <path d="M 170 220 Q 90 260 70 300 Q 80 330 110 320 Q 150 300 170 260 Z" 
+        fill="url(#wingGradient2)" 
+        filter="url(#shadow)"
+        opacity="0.95">
+    <animateTransform attributeName="transform" 
+                      type="rotate" 
+                      values="0 120 280;-2 120 280;0 120 280" 
+                      dur="4s" 
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Sayap bawah kanan -->
+  <path d="M 230 220 Q 310 260 330 300 Q 320 330 290 320 Q 250 300 230 260 Z" 
+        fill="url(#wingGradient2)" 
+        filter="url(#shadow)"
+        opacity="0.95">
+    <animateTransform attributeName="transform" 
+                      type="rotate" 
+                      values="0 280 280;2 280 280;0 280 280" 
+                      dur="4s" 
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Badan kupu-kupu dengan segmentasi -->
+  <ellipse cx="200" cy="200" rx="8" ry="90" fill="url(#bodyGradient)" filter="url(#shadow)"/>
+  
+  <!-- Segmen badan -->
+  <ellipse cx="200" cy="170" rx="6" ry="8" fill="#34495e" opacity="0.8"/>
+  <ellipse cx="200" cy="190" rx="6" ry="8" fill="#34495e" opacity="0.8"/>
+  <ellipse cx="200" cy="210" rx="6" ry="8" fill="#34495e" opacity="0.8"/>
+  <ellipse cx="200" cy="230" rx="6" ry="8" fill="#34495e" opacity="0.8"/>
+  
+  <!-- Antena dengan detail yang lebih baik -->
+  <path d="M 192 120 Q 184 90 176 80" 
+        stroke="#2c3e50" 
+        stroke-width="3" 
+        fill="none" 
+        stroke-linecap="round"
+        filter="url(#glow)"/>
+  <circle cx="176" cy="80" r="4" fill="#e74c3c" filter="url(#glow)"/>
+  
+  <path d="M 208 120 Q 216 90 224 80" 
+        stroke="#2c3e50" 
+        stroke-width="3" 
+        fill="none" 
+        stroke-linecap="round"
+        filter="url(#glow)"/>
+  <circle cx="224" cy="80" r="4" fill="#e74c3c" filter="url(#glow)"/>
+  
+  <!-- Detail sayap yang lebih kompleks -->
+  <!-- Sayap atas kiri -->
+  <circle cx="120" cy="130" r="6" fill="#ffffff" opacity="0.7"/>
+  <circle cx="110" cy="150" r="4" fill="#ffffff" opacity="0.5"/>
+  <circle cx="130" cy="160" r="3" fill="#ffffff" opacity="0.4"/>
+  <path d="M 105 135 Q 115 145 125 140" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.3"/>
+  
+  <!-- Sayap atas kanan -->
+  <circle cx="280" cy="130" r="6" fill="#ffffff" opacity="0.7"/>
+  <circle cx="290" cy="150" r="4" fill="#ffffff" opacity="0.5"/>
+  <circle cx="270" cy="160" r="3" fill="#ffffff" opacity="0.4"/>
+  <path d="M 295 135 Q 285 145 275 140" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.3"/>
+  
+  <!-- Sayap bawah kiri -->
+  <circle cx="130" cy="270" r="5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="116" cy="290" r="3" fill="#ffffff" opacity="0.4"/>
+  <ellipse cx="125" cy="280" rx="8" ry="4" fill="#ffffff" opacity="0.2"/>
+  
+  <!-- Sayap bawah kanan -->
+  <circle cx="270" cy="270" r="5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="284" cy="290" r="3" fill="#ffffff" opacity="0.4"/>
+  <ellipse cx="275" cy="280" rx="8" ry="4" fill="#ffffff" opacity="0.2"/>
+  
+  <!-- Highlight pada badan -->
+  <ellipse cx="196" cy="190" rx="2" ry="30" fill="#ffffff" opacity="0.4"/>
+  
+  <!-- Sound waves yang lebih halus -->
+  <g opacity="0.15">
+    <circle cx="200" cy="200" r="120" fill="none" stroke="#667eea" stroke-width="2">
+      <animate attributeName="r" values="120;140;120" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.15;0;0.15" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="200" cy="200" r="100" fill="none" stroke="#4facfe" stroke-width="2">
+      <animate attributeName="r" values="100;120;100" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+      <animate attributeName="opacity" values="0.15;0;0.15" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+    </circle>
+    <circle cx="200" cy="200" r="80" fill="none" stroke="#43e97b" stroke-width="2">
+      <animate attributeName="r" values="80;100;80" dur="3s" repeatCount="indefinite" begin="1s"/>
+      <animate attributeName="opacity" values="0.15;0;0.15" dur="3s" repeatCount="indefinite" begin="1s"/>
+    </circle>
+  </g>
+  
+  <!-- Kepala kupu-kupu -->
+  <ellipse cx="200" cy="140" rx="5" ry="8" fill="#2c3e50" filter="url(#shadow)"/>
+  <circle cx="198" cy="138" r="1.5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="202" cy="138" r="1.5" fill="#ffffff" opacity="0.6"/>
+</svg>

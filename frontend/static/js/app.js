@@ -583,7 +583,30 @@ class VoiceAssistant {
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.voiceAssistant = new VoiceAssistant();
+    initializeExternalLinks();
 });
+
+// Initialize external links
+function initializeExternalLinks() {
+    // Handle GitHub links
+    document.querySelectorAll('a[href*="github.com"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = link.getAttribute('href');
+            window.open(url, '_blank', 'noopener,noreferrer');
+            
+            // Log to console
+            if (window.voiceAssistant) {
+                window.voiceAssistant.logMessage(`Opening GitHub: ${url}`, 'info');
+            }
+        });
+    });
+
+    // Handle all external links with target="_blank"
+    document.querySelectorAll('a[target="_blank"]').forEach(link => {
+        link.setAttribute('rel', 'noopener noreferrer');
+    });
+}
 
 // Console control functions
 function clearConsole() {

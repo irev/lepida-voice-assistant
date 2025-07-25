@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <!-- Gradient untuk sayap kupu-kupu -->
+    <linearGradient id="wingGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="wingGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#00f2fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#43e97b;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradient untuk badan kupu-kupu -->
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2c3e50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#34495e;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Shadow effect -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.1"/>
+    </filter>
+    
+    <!-- Glow effect untuk antena -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle (optional) -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#f8f9fa" stroke-width="2" opacity="0.3"/>
+  
+  <!-- Sayap atas kiri -->
+  <path d="M 80 70 Q 50 40 30 60 Q 25 75 40 85 Q 60 95 80 85 Z" 
+        fill="url(#wingGradient1)" 
+        filter="url(#shadow)"
+        opacity="0.9">
+    <animateTransform attributeName="transform" 
+                      type="rotate" 
+                      values="0 65 75;-5 65 75;0 65 75" 
+                      dur="3s" 
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Sayap atas kanan -->
+  <path d="M 120 70 Q 150 40 170 60 Q 175 75 160 85 Q 140 95 120 85 Z" 
+        fill="url(#wingGradient1)" 
+        filter="url(#shadow)"
+        opacity="0.9">
+    <animateTransform attributeName="transform" 
+                      type="rotate" 
+                      values="0 135 75;5 135 75;0 135 75" 
+                      dur="3s" 
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Sayap bawah kiri -->
+  <path d="M 85 110 Q 45 130 35 150 Q 40 165 55 160 Q 75 150 85 130 Z" 
+        fill="url(#wingGradient2)" 
+        filter="url(#shadow)"
+        opacity="0.9">
+    <animateTransform attributeName="transform" 
+                      type="rotate" 
+                      values="0 60 140;-3 60 140;0 60 140" 
+                      dur="3s" 
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Sayap bawah kanan -->
+  <path d="M 115 110 Q 155 130 165 150 Q 160 165 145 160 Q 125 150 115 130 Z" 
+        fill="url(#wingGradient2)" 
+        filter="url(#shadow)"
+        opacity="0.9">
+    <animateTransform attributeName="transform" 
+                      type="rotate" 
+                      values="0 140 140;3 140 140;0 140 140" 
+                      dur="3s" 
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Badan kupu-kupu -->
+  <ellipse cx="100" cy="100" rx="4" ry="45" fill="url(#bodyGradient)" filter="url(#shadow)"/>
+  
+  <!-- Antena kiri -->
+  <path d="M 96 60 Q 92 45 88 40" 
+        stroke="#2c3e50" 
+        stroke-width="2" 
+        fill="none" 
+        stroke-linecap="round"
+        filter="url(#glow)"/>
+  <circle cx="88" cy="40" r="2" fill="#e74c3c"/>
+  
+  <!-- Antena kanan -->
+  <path d="M 104 60 Q 108 45 112 40" 
+        stroke="#2c3e50" 
+        stroke-width="2" 
+        fill="none" 
+        stroke-linecap="round"
+        filter="url(#glow)"/>
+  <circle cx="112" cy="40" r="2" fill="#e74c3c"/>
+  
+  <!-- Detail sayap (pola) -->
+  <!-- Pola sayap atas kiri -->
+  <circle cx="60" cy="65" r="3" fill="#ffffff" opacity="0.6"/>
+  <circle cx="55" cy="75" r="2" fill="#ffffff" opacity="0.4"/>
+  
+  <!-- Pola sayap atas kanan -->
+  <circle cx="140" cy="65" r="3" fill="#ffffff" opacity="0.6"/>
+  <circle cx="145" cy="75" r="2" fill="#ffffff" opacity="0.4"/>
+  
+  <!-- Pola sayap bawah kiri -->
+  <circle cx="65" cy="135" r="2.5" fill="#ffffff" opacity="0.5"/>
+  <circle cx="58" cy="145" r="1.5" fill="#ffffff" opacity="0.3"/>
+  
+  <!-- Pola sayap bawah kanan -->
+  <circle cx="135" cy="135" r="2.5" fill="#ffffff" opacity="0.5"/>
+  <circle cx="142" cy="145" r="1.5" fill="#ffffff" opacity="0.3"/>
+  
+  <!-- Highlight pada badan -->
+  <ellipse cx="98" cy="95" rx="1" ry="15" fill="#ffffff" opacity="0.3"/>
+  
+  <!-- Subtle sound waves untuk menunjukkan voice assistant -->
+  <g opacity="0.2">
+    <circle cx="100" cy="100" r="60" fill="none" stroke="#667eea" stroke-width="1">
+      <animate attributeName="r" values="60;70;60" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0;0.2" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="100" r="50" fill="none" stroke="#4facfe" stroke-width="1">
+      <animate attributeName="r" values="50;60;50" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+      <animate attributeName="opacity" values="0.2;0;0.2" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+    </circle>
+  </g>
+</svg>
