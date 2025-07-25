@@ -12,7 +12,7 @@ python-dotenv>=0.19.0
 # AI & ML (production versions)
 torch>=1.9.0
 transformers>=4.20.0
-whisper>=20231117
+openai-whisper>=20231117
 
 # Audio processing
 pyaudio>=0.2.11
