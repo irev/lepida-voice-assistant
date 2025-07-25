@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 # Add parent directory to path to import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config.config import load_config
+from config.config import get_config
 from utils.text_to_speech import TextToSpeech
 from utils.audio_transcription import AudioTranscription
 from utils.system_monitor import SystemMonitor
@@ -29,12 +29,12 @@ logger = logging.getLogger(__name__)
 
 class VoiceAssistantAPI:
     def __init__(self):
-        self.config = load_config()
+        self.config = get_config()
         self.tts = None
         self.stt = None
         self.wake_word = None
         self.system_monitor = SystemMonitor()
-        self.audio_processor = AudioProcessor()
+        self.audio_processor = AudioProcessor(self.config)
         self.is_running = True
         self.start_time = datetime.now()
         
@@ -112,9 +112,9 @@ def status():
     })
 
 @app.route('/api/config')
-def get_config():
+def get_config_endpoint():
     """Get current configuration"""
-    return jsonify(api.config)
+    return jsonify(api.config.config)
 
 @app.route('/api/config/update', methods=['POST'])
 def update_config():
@@ -127,21 +127,8 @@ def update_config():
         if not key:
             return jsonify({'error': 'Key is required'}), 400
         
-        # Update nested configuration
-        keys = key.split('.')
-        config_section = api.config
-        
-        for k in keys[:-1]:
-            if k not in config_section:
-                config_section[k] = {}
-            config_section = config_section[k]
-        
-        config_section[keys[-1]] = value
-        
-        # Save configuration to file
-        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.yml')
-        with open(config_path, 'w') as f:
-            yaml.dump(api.config, f, default_flow_style=False)
+        # Update configuration using the Config object's update method
+        api.config.update(key, value)
         
         logger.info(f"Updated config: {key} = {value}")
         return jsonify({'success': True})
