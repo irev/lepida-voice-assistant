@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lepida Voice Assistant - Control Panel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-microphone"></i>
+                    <h1>Lepida Voice Assistant</h1>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Disconnected</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Navigation -->
+        <nav class="navigation">
+            <ul class="nav-menu">
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a></li>
+                <li><a href="#audio" class="nav-link" data-section="audio">
+                    <i class="fas fa-volume-up"></i> Audio Settings
+                </a></li>
+                <li><a href="#tts" class="nav-link" data-section="tts">
+                    <i class="fas fa-comment"></i> Text-to-Speech
+                </a></li>
+                <li><a href="#stt" class="nav-link" data-section="stt">
+                    <i class="fas fa-microphone-alt"></i> Speech-to-Text
+                </a></li>
+                <li><a href="#wakeword" class="nav-link" data-section="wakeword">
+                    <i class="fas fa-bell"></i> Wake Word
+                </a></li>
+                <li><a href="#system" class="nav-link" data-section="system">
+                    <i class="fas fa-cogs"></i> System
+                </a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                
+                <div class="dashboard-grid">
+                    <!-- System Status Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-heartbeat"></i> System Status</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-item">
+                                <span class="label">Voice Assistant:</span>
+                                <span class="value" id="assistantStatus">Ready</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label">Audio System:</span>
+                                <span class="value" id="audioStatus">Connected</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label">Wake Word:</span>
+                                <span class="value" id="wakewordStatus">Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                        </div>
+                        <div class="card-content">
+                            <button class="btn btn-primary" onclick="startAssistant()">
+                                <i class="fas fa-play"></i> Start Assistant
+                            </button>
+                            <button class="btn btn-secondary" onclick="stopAssistant()">
+                                <i class="fas fa-stop"></i> Stop Assistant
+                            </button>
+                            <button class="btn btn-warning" onclick="restartAssistant()">
+                                <i class="fas fa-redo"></i> Restart
+                            </button>
+                            <button class="btn btn-info" onclick="runHealthCheck()">
+                                <i class="fas fa-stethoscope"></i> Health Check
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Performance Monitor Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Performance</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="performance-item">
+                                <span class="label">CPU Usage:</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="cpuUsage" style="width: 45%"></div>
+                                </div>
+                                <span class="value">45%</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="label">Memory:</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="memoryUsage" style="width: 62%"></div>
+                                </div>
+                                <span class="value">62%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Panel Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-flask"></i> Quick Test</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="test-input-group">
+                                <input type="text" id="testText" placeholder="Enter text to test TTS..." 
+                                       value="Halo, ini adalah tes suara">
+                                <button class="btn btn-primary" onclick="testTTS()">
+                                    <i class="fas fa-volume-up"></i> Test TTS
+                                </button>
+                            </div>
+                            <div class="test-buttons">
+                                <button class="btn btn-secondary" onclick="testSTT()">
+                                    <i class="fas fa-microphone"></i> Test STT
+                                </button>
+                                <button class="btn btn-secondary" onclick="testAudio()">
+                                    <i class="fas fa-headphones"></i> Test Audio
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Audio Settings Section -->
+            <section id="audio" class="content-section">
+                <h2><i class="fas fa-volume-up"></i> Audio Settings</h2>
+                
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-microphone"></i> Input Settings</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="inputDevice">Input Device:</label>
+                                <select id="inputDevice" class="form-select">
+                                    <option value="auto">Auto Detect</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sampleRate">Sample Rate:</label>
+                                <select id="sampleRate" class="form-select">
+                                    <option value="16000">16000 Hz</option>
+                                    <option value="22050">22050 Hz</option>
+                                    <option value="44100">44100 Hz</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="channels">Channels:</label>
+                                <select id="channels" class="form-select">
+                                    <option value="1">Mono</option>
+                                    <option value="2">Stereo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-speaker"></i> Output Settings</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="outputDevice">Output Device:</label>
+                                <select id="outputDevice" class="form-select">
+                                    <option value="auto">Auto Detect</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="volume">Volume:</label>
+                                <input type="range" id="volume" min="0" max="100" value="70" class="form-range">
+                                <span class="range-value">70%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-equalizer"></i> Audio Processing</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="noiseReduction">Noise Reduction:</label>
+                                <input type="checkbox" id="noiseReduction" checked>
+                            </div>
+                            <div class="form-group">
+                                <label for="echoCancellation">Echo Cancellation:</label>
+                                <input type="checkbox" id="echoCancellation" checked>
+                            </div>
+                            <div class="form-group">
+                                <label for="ambientNoise">Ambient Noise Duration:</label>
+                                <input type="range" id="ambientNoise" min="0.5" max="3" step="0.1" value="1.0" class="form-range">
+                                <span class="range-value">1.0s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TTS Settings Section -->
+            <section id="tts" class="content-section">
+                <h2><i class="fas fa-comment"></i> Text-to-Speech Settings</h2>
+                
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-cog"></i> TTS Engine</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="ttsEngine">Primary Engine:</label>
+                                <select id="ttsEngine" class="form-select">
+                                    <option value="mms_tts">MMS TTS (Facebook)</option>
+                                    <option value="coqui_tts">Coqui TTS</option>
+                                    <option value="piper_tts">Piper TTS</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ttsLanguage">Language:</label>
+                                <select id="ttsLanguage" class="form-select">
+                                    <option value="id">Indonesian</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ttsModel">Voice Model:</label>
+                                <select id="ttsModel" class="form-select">
+                                    <option value="facebook/mms-tts-ind">Indonesian MMS</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-sliders-h"></i> Voice Settings</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="speechRate">Speech Rate:</label>
+                                <input type="range" id="speechRate" min="0.5" max="2.0" step="0.1" value="1.0" class="form-range">
+                                <span class="range-value">1.0x</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="pitch">Pitch:</label>
+                                <input type="range" id="pitch" min="0.5" max="2.0" step="0.1" value="1.0" class="form-range">
+                                <span class="range-value">1.0x</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-test-tube"></i> TTS Test</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="ttsTestText">Test Text:</label>
+                                <textarea id="ttsTestText" rows="3" class="form-textarea" 
+                                         placeholder="Enter text to test TTS...">Selamat datang di Lepida Voice Assistant. Sistem text-to-speech bekerja dengan baik.</textarea>
+                            </div>
+                            <button class="btn btn-primary" onclick="testTTSFull()">
+                                <i class="fas fa-play"></i> Test Speech
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STT Settings Section -->
+            <section id="stt" class="content-section">
+                <h2><i class="fas fa-microphone-alt"></i> Speech-to-Text Settings</h2>
+                
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-cog"></i> STT Engine</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="sttEngine">Primary Engine:</label>
+                                <select id="sttEngine" class="form-select">
+                                    <option value="whisper_cpp">Whisper.cpp</option>
+                                    <option value="google_stt">Google STT</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sttLanguage">Language:</label>
+                                <select id="sttLanguage" class="form-select">
+                                    <option value="id">Indonesian</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sttModel">Model Size:</label>
+                                <select id="sttModel" class="form-select">
+                                    <option value="tiny">Tiny (39 MB)</option>
+                                    <option value="base">Base (74 MB)</option>
+                                    <option value="small">Small (244 MB)</option>
+                                    <option value="medium">Medium (769 MB)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-sliders-h"></i> Recognition Settings</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="phraseTimeLimit">Phrase Time Limit:</label>
+                                <input type="range" id="phraseTimeLimit" min="1" max="10" value="5" class="form-range">
+                                <span class="range-value">5s</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="timeout">Timeout:</label>
+                                <input type="range" id="timeout" min="0.5" max="5" step="0.5" value="1" class="form-range">
+                                <span class="range-value">1s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-microphone-check"></i> STT Test</h3>
+                        </div>
+                        <div class="card-content">
+                            <button class="btn btn-primary" onclick="startSTTTest()" id="sttTestBtn">
+                                <i class="fas fa-microphone"></i> Start Recording
+                            </button>
+                            <div class="recording-status" id="recordingStatus" style="display: none;">
+                                <i class="fas fa-circle recording-dot"></i>
+                                Recording... <span id="recordingTimer">0s</span>
+                            </div>
+                            <div class="stt-result" id="sttResult"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Wake Word Settings Section -->
+            <section id="wakeword" class="content-section">
+                <h2><i class="fas fa-bell"></i> Wake Word Detection</h2>
+                
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-toggle-on"></i> Wake Word Control</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="wakewordEnabled">Enable Wake Word:</label>
+                                <input type="checkbox" id="wakewordEnabled" checked>
+                            </div>
+                            <div class="form-group">
+                                <label for="wakewordEngine">Engine:</label>
+                                <select id="wakewordEngine" class="form-select">
+                                    <option value="porcupine">Porcupine</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-key"></i> Keywords</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label for="keywords">Wake Words:</label>
+                                <input type="text" id="keywords" class="form-input" 
+                                       value="hey assistant, lepida" placeholder="Comma-separated keywords">
+                            </div>
+                            <div class="form-group">
+                                <label for="sensitivity">Sensitivity:</label>
+                                <input type="range" id="sensitivity" min="0" max="1" step="0.1" value="0.5" class="form-range">
+                                <span class="range-value">0.5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bell-slash"></i> Wake Word Test</h3>
+                        </div>
+                        <div class="card-content">
+                            <button class="btn btn-primary" onclick="testWakeWord()" id="wakeWordTestBtn">
+                                <i class="fas fa-play"></i> Start Wake Word Test
+                            </button>
+                            <div class="wake-word-status" id="wakeWordStatus">
+                                Say your wake word to test detection...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- System Section -->
+            <section id="system" class="content-section">
+                <h2><i class="fas fa-cogs"></i> System Management</h2>
+                
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-info-circle"></i> System Information</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-item">
+                                <span class="label">Python Version:</span>
+                                <span class="value" id="pythonVersion">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Platform:</span>
+                                <span class="value" id="platform">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Assistant Version:</span>
+                                <span class="value">1.0.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-puzzle-piece"></i> Plugins</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="plugin-list" id="pluginList">
+                                Loading plugins...
+                            </div>
+                            <button class="btn btn-secondary" onclick="validatePlugins()">
+                                <i class="fas fa-check"></i> Validate Plugins
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-download"></i> Actions</h3>
+                        </div>
+                        <div class="card-content">
+                            <button class="btn btn-info" onclick="exportConfig()">
+                                <i class="fas fa-download"></i> Export Config
+                            </button>
+                            <button class="btn btn-warning" onclick="importConfig()">
+                                <i class="fas fa-upload"></i> Import Config
+                            </button>
+                            <button class="btn btn-danger" onclick="resetConfig()">
+                                <i class="fas fa-undo"></i> Reset to Default
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Console Output -->
+        <div class="console" id="console">
+            <div class="console-header">
+                <h3><i class="fas fa-terminal"></i> Console</h3>
+                <button class="btn btn-small" onclick="clearConsole()">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+            <div class="console-content" id="consoleContent">
+                <div class="console-line">[INFO] Frontend interface loaded successfully</div>
+            </div>
+        </div>
+    </div>
+
+<!-- footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2023 Lepida Voice Assistant. Made with <span style="color: #e25555;">&#10084;&#65039;</span></p>
+        </div>
+    </footer>
+    <script>
+        // JavaScript functions for interactivity
+        function startAssistant() {
+            console.log("Starting voice assistant...");
+            // Add logic to start the assistant
+        }
+
+        function stopAssistant() {
+            console.log("Stopping voice assistant...");
+            // Add logic to stop the assistant
+        }
+
+        function restartAssistant() {
+            console.log("Restarting voice assistant...");
+            // Add logic to restart the assistant
+        }
+
+        function runHealthCheck() {
+            console.log("Running health check...");
+            // Add logic for health check
+        }
+
+        function testTTS() {
+            const text = document.getElementById('testText').value;
+            console.log(`Testing TTS with text: ${text}`);
+            // Add logic to test TTS
+        }
+
+        function testSTT() {
+            console.log("Testing STT...");
+            // Add logic to test STT
+        }
+
+        function testAudio() {
+            console.log("Testing audio output...");
+            // Add logic to test audio output
+        }
+
+        function clearConsole() {
+            document.getElementById('consoleContent').innerHTML = '';
+        }
+    <!-- Scripts -->
+    <script src="static/js/app.js"></script>
+</body>
+</html>
